@@ -62,6 +62,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const [selected, setSelected] = useState<UserType | null>(null);
   const [siswaList, setSiswaList] = useState<UserType[]>([]);
+  const [siswaList2, setSiswaList2] = useState<UserType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [showDropdown, setShowDropdown] = useState(false);
