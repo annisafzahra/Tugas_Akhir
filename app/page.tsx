@@ -40,7 +40,6 @@ import AdminPage from '@/components/page/adminPage'
 
 export default function Home() {
   const [page, setPage] = useState<'login' | 'register' | 'soal' | 'hasil' | 'admin'>('login')
-
   const [hasil, setHasil] = useState<any>(null)
 
   return (
@@ -74,7 +73,9 @@ export default function Home() {
       )}
       
       {page === 'admin' && (
-        <AdminPage />
+        <AdminPage 
+          onLogout ={() => setPage('login')} 
+        />
       )}
     </>
   )

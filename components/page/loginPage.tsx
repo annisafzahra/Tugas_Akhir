@@ -1,9 +1,12 @@
 'use client';
 
+import { setToken } from '@/lib/function/token';
 import { loginUser } from '@/lib/function/userFunction';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
+  const router = useRouter();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState('');
@@ -12,6 +15,7 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
+      console.error('username : ', username, 'password : ', password);
       const res = await loginUser({
         username: username,
         password: password,
@@ -19,8 +23,9 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
       if (res) {
         setUsername('');
         setPassword('');
+        setToken(res.token);
         if (res.user?.is_staff) {
-          onAdminLogin();
+          router.push('/admin');
         } else {
           onLogin();
         }
@@ -31,6 +36,7 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-indigo-100 px-4 relative overflow-hidden">
@@ -44,12 +50,12 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
         {/* Logo / Icon Container */}
         <div className="flex justify-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 transform -rotate-6 hover:rotate-0 transition-transform duration-300">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -219,114 +225,3 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
 };
 
 export default LoginPage;
-
-
-
-
-
-// import { loginUser } from '@/lib/function/userFunction';
-// import React, { useState } from 'react';
-
-// const LoginPage = ({ goRegister, onLogin, onAdminLogin}: any) => {
-//   const [password, setPassword] = useState('');
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [username, setUsername] = useState('');
-//   const [login, setLogin] = useState(false);
-
-//   const handleLogin = async () => {
-//     setIsLoading(true);
-//     try {
-//       const res = await loginUser({
-//         username: username,
-//         password: password,
-//       });
-//       if (res) {
-//         setUsername('');
-//         setPassword('');
-//         setLogin(false);
-//         if (res.user?.is_staff) {
-//           onAdminLogin()
-//         } else {
-//           onLogin()
-//         }
-//       } else {
-//         alert(res);
-//       }
-//     } finally {
-
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     // Background gradient yang lebih soft dan memenuhi layar
-//     <div className='min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 px-4'>
-      
-//       {/* Card Container: Soft shadow, rounded besar, dan sedikit efek kaca */}
-//       <div className='w-full max-w-[380px] bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] border border-white flex flex-col items-center'>
-        
-//         {/* Header Section */}
-//         <div className='mb-8 text-center'>
-//           <h1 className='text-2xl font-bold text-slate-800 tracking-tight mb-1'>Selamat Datang</h1>
-//           <p className='text-sm text-slate-500 font-medium'>Silakan masuk ke akunmu</p>
-//         </div>
-
-//         {/* Input Form Section */}
-//         <div className='w-full space-y-4'>
-//           <div>
-//             <input
-//               type="text"
-//               placeholder='Username'
-//               value={username}
-//               onChange={(e) => setUsername(e.target.value)}
-//               className='w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:bg-white transition-all duration-300'
-//             />
-//           </div>
-
-//           <div>
-//             <input
-//               type="password"
-//               placeholder='Password'
-//               value={password}
-//               onChange={(e) => setPassword(e.target.value)}
-//               className='w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:bg-white transition-all duration-300'
-//             />
-//           </div>
-//         </div>
-
-//         {/* Button Section */}
-//         <button
-//           onClick={handleLogin}
-//           disabled={isLoading}
-//           className={`w-full p-4 mt-8 rounded-2xl font-semibold text-white transition-all duration-300 flex justify-center items-center
-//             ${isLoading 
-//               ? 'bg-indigo-300 cursor-not-allowed' 
-//               : 'bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5 active:scale-[0.98]'
-//             }
-//           `}
-//         >
-//           {isLoading ? (
-//             // Simple loading spinner pakai Tailwind
-//             <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
-//           ) : (
-//             'Login'
-//           )}
-//         </button>
-
-//         {/* Footer Section */}
-//         <p className='text-sm text-slate-500 mt-8 font-medium'>
-//           Belum punya akun?{' '}
-//           <span 
-//             className='text-indigo-500 font-semibold cursor-pointer hover:text-indigo-600 transition-colors' 
-//             onClick={goRegister}
-//           >
-//             Daftar di sini
-//           </span>
-//         </p>
-
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default LoginPage;
