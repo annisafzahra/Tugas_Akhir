@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 type HasilType = {
@@ -24,6 +25,7 @@ const HasilPage = ({
   kelasSiswa = '',
   onKembali,
 }: HasilPageProps) => {
+  const router = useRouter();
   const isSiswa = mode === 'siswa';
   const isAdmin = mode === 'admin';
 
@@ -31,7 +33,7 @@ const HasilPage = ({
   const hasilCards = [
     {
       title: 'Berdasarkan Akademik',
-      jurusan: data.akademik,
+      jurusan: data?.akademik,
       desc: 'Rekomendasi ini didasarkan pada nilai mata pelajaran yang dimiliki di semester terakhir.',
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +44,7 @@ const HasilPage = ({
     },
     {
       title: 'Berdasarkan Minat (RIASEC)',
-      jurusan: data.riasec,
+      jurusan: data?.riasec,
       desc: 'Rekomendasi ini melihat minat dan ketertarikan terhadap suatu bidang pekerjaan di masa depan.',
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +55,7 @@ const HasilPage = ({
     },
     {
       title: 'Berdasarkan Bakat',
-      jurusan: data.bakat,
+      jurusan: data?.bakat,
       desc: 'Rekomendasi ini dihitung dari kemampuan logika, verbal, dan mekanikal yang dimiliki.',
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +221,7 @@ const HasilPage = ({
                   </p>
                 </div>
 
-                <h2 className="text-2xl font-bold mb-3">{data.gabungan}</h2>
+                <h2 className="text-2xl font-bold mb-3">{data?.gabungan}</h2>
 
                 <p className="text-sm text-blue-100 leading-relaxed mb-4">
                   Ini adalah hasil akhir berdasarkan gabungan seluruh aspek:
@@ -269,7 +271,7 @@ const HasilPage = ({
             {/* Tombol Ulangi Tes — HANYA untuk mode siswa */}
             {isSiswa && (
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => router.push('/soal')}
                 className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl font-semibold text-sm hover:from-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <svg

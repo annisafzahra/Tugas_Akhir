@@ -37,46 +37,29 @@ import RegisterPage from '@/components/page/registerPage'
 import SoalPage from '@/components/page/soalPage'
 import HasilPage from '@/components/page/hasilPage'
 import AdminPage from '@/components/page/adminPage'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
-  const [page, setPage] = useState<'login' | 'register' | 'soal' | 'hasil' | 'admin'>('login')
-  const [hasil, setHasil] = useState<any>(null)
+  const router = useRouter();
+  const [page, setPage] = useState<'login' | 'register'>('login')
 
   return (
     <>
       {page === 'login' && (
         <LoginPage
           goRegister={() => setPage('register')}
-          onLogin={() => setPage('soal')}
-          onAdminLogin={() => setPage('admin')}
+          onLogin={() => router.push('/soal')}
+          onAdminLogin={() => router.push('/admin')}
         />
       )}
 
       {page === 'register' && (
         <RegisterPage
           goLogin={() => setPage('login')}
-          afterRegister={() => setPage('soal')}
+          afterRegister={() => router.push('/soal')}
         />
       )}
       
-      {page === 'soal' && (
-        <SoalPage
-          onFinish={(data: any) => {
-            setHasil(data)
-            setPage('hasil')
-          }}
-        />
-      )}
-
-      {page === 'hasil' && hasil && (
-        <HasilPage data={hasil} />
-      )}
-      
-      {page === 'admin' && (
-        <AdminPage 
-          onLogout ={() => setPage('login')} 
-        />
-      )}
     </>
   )
 }

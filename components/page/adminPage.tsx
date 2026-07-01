@@ -294,7 +294,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       <div className="pointer-events-none absolute -bottom-32 left-1/3 h-96 w-96 rounded-full bg-cyan-200/30 blur-3xl" />
 
       <main className="relative mx-auto w-full max-w-6xl">
-        <header className="relative z-70 mb-6 flex flex-col gap-4 rounded-[2rem] border-[.5px] border-cyan-500 bg-white/80 p-5 shadow-xl shadow-slate-200/50 backdrop-blur md:flex-row md:items-center md:justify-between">
+        <header className="relative z-50 mb-6 flex flex-col gap-4 rounded-[2rem] border-[.5px] border-cyan-500 bg-white/80 p-5 shadow-xl shadow-slate-200/50 backdrop-blur md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-200">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -586,7 +586,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
               >
                 Tutup
               </button>
-              <button
+              {/* <button
                 onClick={() => setShowProfile(false)}
                 className="mt-2 w-full rounded-2xl bg-gradient-to-r from-red-500 to-[#ff086b] py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5"
               >
@@ -603,7 +603,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               Logout
-            </button>
+            </button> */}
             </div>
           </div>
         </div>

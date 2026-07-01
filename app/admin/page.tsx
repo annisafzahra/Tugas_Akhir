@@ -7,7 +7,7 @@ const Page = () => {
   const router = useRouter()
   return (
     <AdminPage 
-      onLogout ={() => router.push('/login')} 
+      onLogout ={() => router.push('/')} 
     />
   )
 }

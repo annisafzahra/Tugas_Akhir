@@ -3,7 +3,8 @@ import { loginType } from "@/type/loginType";
 import { registerType } from "@/type/registerType";
 import { getToken } from "./token";
 
-export const BASEURL = process.env.NEXT_PUBLIC_API_URL + "/api/";
+export const BASEURL = "http://127.0.0.1:8000/api/";
+// export const BASEURL = process.env.NEXT_PUBLIC_API_URL + "/api/";
 
 export const api = axios.create({
   baseURL: BASEURL,
@@ -17,9 +18,16 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = getToken();
-    if (token) {
+
+    const publicEndpoints = ["login/", "user/create/"];
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      config.url?.includes(endpoint)
+    );
+
+    if (token && !isPublicEndpoint) {
       config.headers.Authorization = `Token ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)

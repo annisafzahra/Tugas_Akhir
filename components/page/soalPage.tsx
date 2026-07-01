@@ -5,6 +5,7 @@ import { soalList } from '@/lib/data/dataSoal';
 import { soalBakat } from '@/lib/data/dataBakat';
 import { dataAkademik } from '@/lib/data/dataAkademik';
 import { submitTes } from '@/lib/function/api';
+import { useRouter } from 'next/navigation';
 
 const pilihanRiasec = [
   { label: 'A', nilai: 5, text: 'Sangat Suka' },
@@ -21,7 +22,8 @@ const dummyUser = {
   kelas: '9-A',
 };
 
-const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
+const SoalPage = () => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [jawabanRiasec, setJawabanRiasec] = useState<any[]>([]);
   const [jawabanBakat, setJawabanBakat] = useState<any[]>([]);
@@ -36,6 +38,7 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
   const [showLogout, setShowLogout] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAnswerCheck, setShowAnswerCheck] = useState(false);
 
   // ===== REFS UNTUK SCROLL =====
   const contentRef = useRef<HTMLDivElement>(null);
@@ -52,6 +55,7 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
       soalBakat.map((item) => ({
         soal_id: item.id,
         jawaban: '',
+        nilai: 0,
       }))
     );
   }, []);
@@ -71,7 +75,7 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
 
   const updateBakat = (id: number, value: string) => {
     setJawabanBakat((prev) =>
-      prev.map((j) => (j.soal_id === id ? { ...j, jawaban: value } : j))
+      prev.map((j) => (j.soal_id === id ? { ...j, jawaban: value, nilai: 1 } : j))
     );
   };
 
@@ -104,6 +108,69 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
 
   const isStep3Complete = () => {
     return jawabanBakat.every((j) => j.jawaban !== '');
+  };
+
+  const akademikItems = [
+    { key: 'mtk', label: 'MTK', title: 'Matematika' },
+    { key: 'indo', label: 'INDO', title: 'Bahasa Indonesia' },
+    { key: 'ipa', label: 'IPA', title: 'Ilmu Pengetahuan Alam' },
+    { key: 'ips', label: 'IPS', title: 'Ilmu Pengetahuan Sosial' },
+  ] as const;
+
+  const answerTargets = [
+    ...akademikItems.map((item) => ({
+      step: 1,
+      group: 'Akademik',
+      label: item.label,
+      title: item.title,
+      refKey: `akademik-${item.key}`,
+      answered: Number(akademik[item.key]) > 0,
+      value: akademik[item.key],
+    })),
+    ...soalList.map((item, index) => {
+      const jawaban = jawabanRiasec.find((j) => j.soal_id === item.id);
+      return {
+        step: 2,
+        group: 'RIASEC',
+        label: String(index + 1),
+        title: `Soal ${index + 1}`,
+        refKey: `riasec-${item.id}`,
+        answered: Number(jawaban?.nilai || 0) > 0,
+        value: jawaban?.nilai || 0,
+      };
+    }),
+    ...soalBakat.map((item: any, index: number) => {
+      const jawaban = jawabanBakat.find((j) => j.soal_id === item.id);
+      return {
+        step: 3,
+        group: 'Bakat',
+        label: String(index + 1),
+        title: `Soal ${index + 1}`,
+        refKey: `bakat-${item.id}`,
+        answered: Boolean(jawaban?.jawaban),
+        value: jawaban?.jawaban || '',
+      };
+    }),
+  ];
+
+  const unansweredTargets = answerTargets.filter((item) => !item.answered);
+  const totalAnswered = answerTargets.length - unansweredTargets.length;
+  const progressJawaban = answerTargets.length > 0 ? Math.round((totalAnswered / answerTargets.length) * 100) : 0;
+
+  const goToAnswerTarget = (target: any) => {
+    setShowAnswerCheck(false);
+    setStep(target.step);
+
+    setTimeout(() => {
+      const el = soalRefs.current[target.refKey];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-red-300', 'ring-offset-2');
+        setTimeout(() => {
+          el.classList.remove('ring-2', 'ring-red-300', 'ring-offset-2');
+        }, 2000);
+      }
+    }, 250);
   };
 
   // ===== CARI SOAL PERTAMA YANG BELUM TERJAWAB =====
@@ -219,15 +286,19 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
 
     try {
       const response = await submitTes(dataUntukBackend);
+    
       if (response.status === 201) {
         const result = response.data;
         console.log('✅ Response dari backend:', result);
-        onFinish({
-          akademik: result.rekomendasi_akademik,
-          riasec: result.rekomendasi_riasec,
-          bakat: result.rekomendasi_bakat,
-          gabungan: result.rekomendasi_gabungan,
+    
+        const params = new URLSearchParams({
+          akademik: result.rekomendasi_akademik || '-',
+          riasec: result.rekomendasi_riasec || '-',
+          bakat: result.rekomendasi_bakat || '-',
+          gabungan: result.rekomendasi_gabungan || '-',
         });
+    
+        router.push(`/hasil?${params.toString()}`);
       }
     } catch (error: any) {
       console.error('❌ Gagal submit:', error);
@@ -237,6 +308,8 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
   };
 
   const stepIcons = ['📚', '💭', '🧠'];
+
+  
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-100 via-white to-indigo-100 relative overflow-hidden">
@@ -305,7 +378,139 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex-1 flex items-center justify-center p-4 relative z-10">
         <div className="w-full max-w-2xl">
-          <div className="bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] border border-blue-50 flex flex-col h-[85vh]">
+          <div className="relative bg-white p-6 rounded-3xl shadow-xl border border-slate-200 flex flex-col h-[85vh]">
+            
+            {/* NUMBER SOAL DESKTOP */}
+            <div className="absolute left-full top-0 z-40 ml-5 hidden w-[340px] rounded-[2rem] border border-blue-100 bg-white/95 p-7 shadow-2xl shadow-slate-200/70 backdrop-blur xl:block">
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  {/* <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">Peta Jawaban</p> */}
+                  <h3 className="mt-1 text-base font-bold text-slate-800">Cek Kelengkapan Tes</h3>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {totalAnswered} dari {answerTargets.length} sudah terisi.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAnswerCheck(true)}
+                  className="rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  Cek
+                </button>
+              </div>
+
+              <div className="mb-5 rounded-2xl bg-slate-50 p-3">
+                <div className="mb-2 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-600">Progress</span>
+                  <span className="font-bold text-blue-600">{progressJawaban}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
+                    style={{ width: `${progressJawaban}%` }}
+                  />
+                </div>
+                <p className={`mt-2 text-xs font-medium ${unansweredTargets.length === 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {unansweredTargets.length === 0
+                    ? 'Semua jawaban sudah lengkap.'
+                    : `${unansweredTargets.length} jawaban belum terisi.`}
+                </p>
+              </div>
+
+              <div className="max-h-[58vh] space-y-5 overflow-y-auto pr-1">
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 1 Akademik</p>
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
+                      {akademikItems.filter((item) => Number(akademik[item.key]) > 0).length}/4
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {akademikItems.map((item) => {
+                      const answered = Number(akademik[item.key]) > 0;
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => goToAnswerTarget({ step: 1, refKey: `akademik-${item.key}` })}
+                          className={`flex h-11 items-center justify-center rounded-2xl border text-[11px] font-bold transition hover:-translate-y-0.5
+                            ${answered
+                              ? 'border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-100'
+                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                            }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 2 RIASEC</p>
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-600">
+                      {jawabanRiasec.filter((item) => Number(item.nilai) > 0).length}/{jawabanRiasec.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {jawabanRiasec.map((item, index) => {
+                      const answered = Number(item.nilai) > 0;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => goToAnswerTarget({ step: 2, refKey: `riasec-${item.soal_id}` })}
+                          className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-xs font-bold transition hover:-translate-y-0.5
+                            ${answered
+                              ? 'border-purple-500 bg-purple-500 text-white shadow-md shadow-purple-100'
+                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                            }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 3 Bakat</p>
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+                      {jawabanBakat.filter((item) => item.jawaban !== '').length}/{jawabanBakat.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {jawabanBakat.map((item, index) => {
+                      const answered = item.jawaban !== '';
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => goToAnswerTarget({ step: 3, refKey: `bakat-${item.soal_id}` })}
+                          className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-xs font-bold transition hover:-translate-y-0.5
+                            ${answered
+                              ? 'border-green-500 bg-green-500 text-white shadow-md shadow-green-100'
+                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                            }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* TOMBOL CEK JAWABAN MOBILE */}
+            <button
+              onClick={() => setShowAnswerCheck(true)}
+              className="absolute right-4 -top-4 z-20 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-bold text-blue-600 shadow-lg shadow-slate-200 border-1 border-blue-500 transition hover:bg-blue-50 xl:hidden"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">
+                {unansweredTargets.length}
+              </span>
+              Cek
+            </button>
+            
             {/* HEADER */}
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between mb-3">
@@ -328,7 +533,7 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
             {/* CONTENT */}
             <div
               ref={contentRef}
-              className="flex-1 overflow-y-auto px-6 pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent scroll-smooth"
+              className="flex-1 overflow-y-auto px-4 pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent scroll-smooth"
             >
               {/* ===== STEP 1: AKADEMIK ===== */}
               {step === 1 && (
@@ -361,11 +566,11 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
                             </span>
                             {item.label}
                           </p>
-                          {nilai > 0 && (
+                          {/* {nilai > 0 && (
                             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${info.bg} ${info.color}`}>
                               {info.label}
                             </span>
-                          )}
+                          )} */}
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -606,6 +811,135 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
         </div>
       </div>
 
+      
+
+
+      {/* ===== MODAL CEK JAWABAN ===== */}
+      {showAnswerCheck && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={() => setShowAnswerCheck(false)}></div>
+          
+          <div className="w-[340px] rounded-2xl border border-blue-100 bg-white/95 p-7 shadow-2xl shadow-slate-200/70 backdrop-blur xl:block">
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  {/* <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-500">Peta Jawaban</p> */}
+                  <h3 className="mt-1 text-base font-bold text-slate-800">Cek Kelengkapan Tes</h3>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {totalAnswered} dari {answerTargets.length} sudah terisi.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAnswerCheck(false)}
+                  className="rounded-2xl bg-gradient-to-r from-red-500 to-[#ff1269] px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mb-5 rounded-2xl bg-slate-50 p-3">
+                <div className="mb-2 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-600">Progress</span>
+                  <span className="font-bold text-blue-600">{progressJawaban}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
+                    style={{ width: `${progressJawaban}%` }}
+                  />
+                </div>
+                <p className={`mt-2 text-xs font-medium ${unansweredTargets.length === 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {unansweredTargets.length === 0
+                    ? 'Semua jawaban sudah lengkap.'
+                    : `${unansweredTargets.length} jawaban belum terisi.`}
+                </p>
+              </div>
+
+              <div className="max-h-[58vh] space-y-5 overflow-y-auto pr-1">
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 1 Akademik</p>
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
+                      {akademikItems.filter((item) => Number(akademik[item.key]) > 0).length}/4
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {akademikItems.map((item) => {
+                      const answered = Number(akademik[item.key]) > 0;
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => goToAnswerTarget({ step: 1, refKey: `akademik-${item.key}` })}
+                          className={`flex h-11 items-center justify-center rounded-2xl border text-[11px] font-bold transition hover:-translate-y-0.5
+                            ${answered
+                              ? 'border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-100'
+                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                            }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 2 RIASEC</p>
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-600">
+                      {jawabanRiasec.filter((item) => Number(item.nilai) > 0).length}/{jawabanRiasec.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {jawabanRiasec.map((item, index) => {
+                      const answered = Number(item.nilai) > 0;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => goToAnswerTarget({ step: 2, refKey: `riasec-${item.soal_id}` })}
+                          className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-xs font-bold transition hover:-translate-y-0.5
+                            ${answered
+                              ? 'border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-100'
+                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                            }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 3 Bakat</p>
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+                      {jawabanBakat.filter((item) => item.jawaban !== '').length}/{jawabanBakat.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {jawabanBakat.map((item, index) => {
+                      const answered = item.jawaban !== '';
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => goToAnswerTarget({ step: 3, refKey: `bakat-${item.soal_id}` })}
+                          className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-xs font-bold transition hover:-translate-y-0.5
+                            ${answered
+                              ? 'border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-100'
+                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                            }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      )}
+
       {/* ===== MODAL PROFILE ===== */}
       {showProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -710,6 +1044,7 @@ const SoalPage = ({ onFinish }: { onFinish: (data: any) => void }) => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

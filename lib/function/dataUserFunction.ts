@@ -20,7 +20,7 @@ const dataUserFunction = () => {
     },[]);
 
     useEffect(()=>{
-        alert(`dataUser: ${JSON.stringify(dataUser)}`)
+        // alert(`dataUser: ${JSON.stringify(dataUser)}`)
     }, [dataUser])
     
     return { dataUser };
