@@ -67,7 +67,7 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] border border-blue-50">
+        <div className="bg-white rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] border border-blue-200">
           {/* Header Section */}
           <div className="mb-8 text-center">
             <h1 className="text-[1.75rem] font-bold text-slate-800 tracking-tight mb-2">

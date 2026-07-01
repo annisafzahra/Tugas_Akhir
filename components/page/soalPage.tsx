@@ -241,8 +241,9 @@ const SoalPage = () => {
   };
 
   const handleLogout = () => {
-    alert('Logout berhasil! (Nanti redirect ke halaman login)');
+    // alert('Logout berhasil! (Nanti redirect ke halaman login)');
     setShowLogout(false);
+    router.push('/');
   };
 
   const handleSubmit = async () => {
