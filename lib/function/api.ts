@@ -37,9 +37,7 @@ api.interceptors.request.use(
 export const login = (data: loginType) => api.post("login/", data);
 export const register = (data: registerType) => api.post("user/create/", data);
 export const getUser = () => api.get("user/get/");
-
-export const getListNetworkTraffic = () => api.get("networkTraffic/list/");
-export const uploadFileCSV = (data: FormData) => api.post("uploadCSV/", data);
+export const getMe = (id: number) => api.get(`user/detail/${id}/`);
 
 // TES
 export const submitTes = (data: any) => api.post("tes/submit/", data);
@@ -51,3 +49,4 @@ export const deleteHasilTes = (id: number) => api.delete(`admin/delete-hasil/${i
 // USER
 export const getListSiswa = () => api.get(`admin/siswa/`);
 export const deleteSiswa = (userId: number) => api.delete(`admin/delete-user/${userId}/`);
+export const updateSiswa = (userId: number, data: any) => api.patch(`admin/update-user/${userId}/`, data);

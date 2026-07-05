@@ -6,16 +6,16 @@ import { useRouter } from 'next/navigation';
 import dataHasilTest from '@/lib/function/dataHasilTest';
 import dataUserFunction from '@/lib/function/dataUserFunction';
 import { removeToken } from '@/lib/function/token';
-import { deleteHasilTes, deleteSiswa } from '@/lib/function/api';
+import { deleteHasilTes, deleteSiswa, getMe, updateSiswa } from '@/lib/function/api';
 import { CreateUser } from '@/lib/function/userFunction';
 import { UserType } from '@/type/dataHasilTestType';
 
-const dataAdmin = {
-  nama: 'Isha Khalil, S.Pd.',
-  nip: '198501012010011001',
-  email: 'isha.khalil@sekolah.sch.id',
-  role: 'Guru BK',
-};
+// const me = {
+//   nama: 'Isha Khalil, S.Pd.',
+//   nip: '198501012010011001',
+//   email: 'isha.khalil@sekolah.sch.id',
+//   role: 'Guru BK',
+// };
 
 type FormMode = 'tambah' | 'edit';
 
@@ -26,6 +26,7 @@ type FormState = {
   username: string;
   email: string;
   kelamin: string;
+  nip: string;
   usia: number | '';
   is_staff: boolean;
   password: string;
@@ -38,6 +39,7 @@ const initialForm: FormState = {
   kelas: '',
   username: '',
   email: '',
+  nip: '',
   kelamin: 'pria',
   usia: '',
   is_staff: false,
@@ -82,6 +84,30 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [pickHapus, setPickHapus] = useState(0);
+
+  const [updateTarget, setUpdateTarget] = useState(0);
+  const [me, setMe] = useState<UserType>({
+      id: 0,
+      username: '',
+      nama_lengkap: '',
+      kelas: '',
+      usia: 0,
+      kelamin: '',
+      email: '',
+      is_staff: true,
+    });
+
+  useEffect(()=>{
+    const fetch = async () => {
+      const id = localStorage.getItem('user_id_jurusan');
+      const res = await getMe(Number(id))
+      if(res.status === 200){
+        setMe(res.data);
+        alert(`Selamat datang, ${res.data.nama_lengkap.split(' ')[0]}!`);
+      }
+    }
+    fetch()
+  }, [])
 
   useEffect(() => {
     setSiswaList(dataUser || []);
@@ -147,6 +173,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const handleOpenEdit = (siswa: UserType) => {
     setFormMode('edit');
+    setUpdateTarget(siswa.id || 0);
     setFormData({
       id: siswa.id,
       nama_lengkap: siswa.nama_lengkap || '',
@@ -154,6 +181,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       username: siswa.username || '',
       email: siswa.email || '',
       kelamin: siswa.kelamin || 'pria',
+      nip: siswa.nip || '',
       usia: siswa.usia || '',
       is_staff: siswa.is_staff || false,
       password: '',
@@ -204,7 +232,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmitForm = async () => {
+  const handleCreate = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -253,6 +281,53 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       resetForm();
     } catch (error) {
       alert('Terjadi kesalahan koneksi.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!updateTarget) return;
+  
+    setIsLoading(true);
+  
+    try {
+      const payload = {
+        username: formData.username,
+        nama_lengkap: formData.nama_lengkap,
+        kelas: formData.kelas,
+        nip: formData.nip || null,
+        usia: formData.usia ? Number(formData.usia) : null,
+        kelamin: formData.kelamin,
+        email: formData.email,
+      };
+  
+      const res = await updateSiswa(updateTarget, payload);
+  
+      if (res.status === 200) {
+        const updatedUser = res.data.data;
+  
+        if (formData.is_staff === true) {
+          setMe(updatedUser);
+        } else {
+          setSiswaList((prev) =>
+            prev.map((siswa) =>
+              siswa.id === updateTarget ? updatedUser : siswa
+            )
+          );
+        }
+  
+        setShowFormModal(false);
+        setUpdateTarget(0);
+        alert('Data berhasil diperbarui.');
+      } else {
+        alert('Gagal mengupdate data. Silakan coba lagi.');
+      }
+  
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert('Gagal mengupdate data.');
     } finally {
       setIsLoading(false);
     }
@@ -323,15 +398,15 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
           <div className="relative flex items-center justify-between gap-3 md:justify-end">
             <div className="hidden text-right md:block">
-              <p className="text-sm font-semibold text-slate-800">{dataAdmin.nama}</p>
-              <p className="text-xs text-slate-500">{dataAdmin.role}</p>
+              <p className="text-sm font-semibold text-slate-800">{me.nama_lengkap}</p>
+              <p className="text-xs text-slate-500">Guru BK</p>
             </div>
 
             <button
               onClick={() => setShowDropdown((prev) => !prev)}
               className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl"
             >
-              {getInitial(dataAdmin.nama)}
+              {getInitial(me.nama_lengkap)}
             </button>
 
             {showDropdown && (
@@ -339,8 +414,8 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 <div className="fixed z-80 inset-0" onClick={() => setShowDropdown(false)} />
                 <div className="fixed right-0 top-[100px] z-90 w-64 overflow-hidden rounded-3xl border-[.5px] border-blue-500 bg-white shadow-2xl shadow-slate-200">
                   <div className="border-b border-slate-100 p-4">
-                    <p className="text-sm font-bold text-slate-800">{dataAdmin.nama}</p>
-                    <p className="text-xs text-slate-500">{dataAdmin.email}</p>
+                    <p className="text-sm font-bold text-slate-800">{me.nama_lengkap}</p>
+                    <p className="text-xs text-slate-500">{me.email}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -808,25 +883,31 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
               </button>
 
               <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-[1.7rem] bg-gradient-to-br from-blue-500 to-indigo-600 text-2xl font-bold text-white shadow-lg shadow-blue-200">
-                {getInitial(dataAdmin.nama)}
+                {getInitial(me.nama_lengkap)}
               </div>
-              <h2 className="text-xl font-bold text-slate-900">{dataAdmin.nama}</h2>
-              <p className="mb-5 text-sm font-medium text-blue-600">{dataAdmin.role}</p>
+              <h2 className="text-xl font-bold text-slate-900">{me.nama_lengkap}</h2>
+              <p className="mb-5 text-sm font-medium text-blue-600">Guru BK</p>
 
               <div className="space-y-3 rounded-3xl bg-slate-50 p-4 text-left">
                 <div className="rounded-2xl bg-white p-3">
                   <p className="text-xs text-slate-400">NIP</p>
-                  <p className="text-sm font-semibold text-slate-700">{dataAdmin.nip}</p>
+                  <p className="text-sm font-semibold text-slate-700">{me.nip}</p>
                 </div>
                 <div className="rounded-2xl bg-white p-3">
                   <p className="text-xs text-slate-400">Email</p>
-                  <p className="text-sm font-semibold text-slate-700">{dataAdmin.email}</p>
+                  <p className="text-sm font-semibold text-slate-700">{me.email}</p>
                 </div>
               </div>
 
               <button
+                onClick={() => handleOpenEdit(me)}
+                className="mt-5 w-full rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5"
+              >
+                Edit Profile
+              </button>
+              <button
                 onClick={() => setShowProfile(false)}
-                className="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5"
+                className="mt-2 w-full rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5"
               >
                 Tutup
               </button>
@@ -920,7 +1001,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       {showFormModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" onClick={() => setShowFormModal(false)} />
-          <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] bg-white p-6 shadow-2xl shadow-slate-900/20">
+          <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] bg-white p-10 shadow-2xl shadow-slate-900/20">
             <button
               onClick={() => setShowFormModal(false)}
               className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200"
@@ -961,21 +1042,40 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 {formErrors.nama_lengkap && <p className="mt-1 text-xs font-medium text-red-500">{formErrors.nama_lengkap}</p>}
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Kelas</label>
-                <input
-                  type="text"
-                  value={formData.kelas}
-                  onChange={(e) => handleChange('kelas', e.target.value)}
-                  placeholder="Contoh: 9-A"
-                  className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
-                    formErrors.kelas
-                      ? 'border-red-200 bg-red-50 focus:ring-red-100'
-                      : 'border-slate-200 bg-slate-50 focus:border-blue-200 focus:bg-white focus:ring-blue-100'
-                  }`}
-                />
-                {formErrors.kelas && <p className="mt-1 text-xs font-medium text-red-500">{formErrors.kelas}</p>}
-              </div>
+              {formData.is_staff === true ? (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-slate-600">NIP</label>
+                  <input
+                    type="text"
+                    value={formData.nip}
+                    onChange={(e) => handleChange('nip', e.target.value)}
+                    placeholder="Contoh: 198501012010011001"
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+                      formErrors.nip
+                        ? 'border-red-200 bg-red-50 focus:ring-red-100'
+                        : 'border-slate-200 bg-slate-50 focus:border-blue-200 focus:bg-white focus:ring-blue-100'
+                    }`}
+                  />
+                  {formErrors.kelas && <p className="mt-1 text-xs font-medium text-red-500">{formErrors.nip}</p>}
+                </div>
+              ):(
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-slate-600">Kelas</label>
+                  <input
+                    type="text"
+                    value={formData.kelas}
+                    onChange={(e) => handleChange('kelas', e.target.value)}
+                    placeholder="Contoh: 9-A"
+                    className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+                      formErrors.kelas
+                        ? 'border-red-200 bg-red-50 focus:ring-red-100'
+                        : 'border-slate-200 bg-slate-50 focus:border-blue-200 focus:bg-white focus:ring-blue-100'
+                    }`}
+                  />
+                  {formErrors.kelas && <p className="mt-1 text-xs font-medium text-red-500">{formErrors.kelas}</p>}
+                </div>
+              )}
+              
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-slate-600">Usia</label>
@@ -1117,7 +1217,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 Batal
               </button>
               <button
-                onClick={handleSubmitForm}
+                onClick={formMode === 'tambah' ? handleCreate : handleUpdate}
                 disabled={isLoading}
                 className="flex-1 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
               >

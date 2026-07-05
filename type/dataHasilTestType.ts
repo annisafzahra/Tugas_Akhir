@@ -35,6 +35,7 @@ export type UserType = {
     username: string;
     nama_lengkap: string;
     kelas: string;
+    nip?: string;
     usia: number;
     kelamin: string;
     email: string;

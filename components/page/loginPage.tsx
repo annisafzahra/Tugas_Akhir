@@ -23,6 +23,7 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
       if (res) {
         setUsername('');
         setPassword('');
+        localStorage.setItem('user_id_jurusan', res.user.id.toString());
         setToken(res.token);
         if (res.user?.is_staff) {
           router.push('/admin');

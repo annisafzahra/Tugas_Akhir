@@ -4,8 +4,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { soalList } from '@/lib/data/dataSoal';
 import { soalBakat } from '@/lib/data/dataBakat';
 import { dataAkademik } from '@/lib/data/dataAkademik';
-import { submitTes } from '@/lib/function/api';
+import { getMe, submitTes } from '@/lib/function/api';
 import { useRouter } from 'next/navigation';
+import { UserType } from '@/type/dataHasilTestType';
 
 const pilihanRiasec = [
   { label: 'A', nilai: 5, text: 'Sangat Suka' },
@@ -15,12 +16,12 @@ const pilihanRiasec = [
   { label: 'E', nilai: 1, text: 'Sangat Tidak Suka' },
 ];
 
-const dummyUser = {
-  nama_lengkap: 'Andi Pratama',
-  username: 'andi123',
-  email: 'andi@sekolah.sch.id',
-  kelas: '9-A',
-};
+// const me = {
+//   nama_lengkap: 'Andi Pratama',
+//   username: 'andi123',
+//   email: 'andi@sekolah.sch.id',
+//   kelas: '9-A',
+// };
 
 const SoalPage = () => {
   const router = useRouter();
@@ -32,6 +33,16 @@ const SoalPage = () => {
     indo: 0,
     ipa: 0,
     ips: 0,
+  });
+  const [me, setMe] = useState<UserType>({
+    id: 0,
+    username: '',
+    nama_lengkap: '',
+    kelas: '',
+    usia: 0,
+    kelamin: '',
+    email: '',
+    is_staff: false,
   });
 
   const [showProfile, setShowProfile] = useState(false);
@@ -59,6 +70,18 @@ const SoalPage = () => {
       }))
     );
   }, []);
+
+  useEffect(()=>{
+    const fetch = async () => {
+      const id = localStorage.getItem('user_id_jurusan');
+      const res = await getMe(Number(id))
+      if(res.status === 200){
+        setMe(res.data);
+        alert(`Selamat datang, ${res.data.nama_lengkap.split(' ')[0]}!`);
+      }
+    }
+    fetch()
+  }, [])
 
   // ===== SCROLL TO TOP SAAT PINDAH STEP =====
   useEffect(() => {
@@ -331,7 +354,7 @@ const SoalPage = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-slate-800">Tes Penjurusan</h1>
-              <p className="text-xs text-slate-500">Hai, {dummyUser.nama_lengkap.split(' ')[0]}</p>
+              <p className="text-xs text-slate-500">Hai, {me.nama_lengkap.split(' ')[0]}</p>
             </div>
           </div>
 
@@ -340,7 +363,7 @@ const SoalPage = () => {
               onClick={() => setShowDropdown(!showDropdown)}
               className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
             >
-              {dummyUser.nama_lengkap.charAt(0)}
+              {me.nama_lengkap.charAt(0)}
             </button>
 
             {showDropdown && (
@@ -348,8 +371,8 @@ const SoalPage = () => {
                 <div className="fixed inset-0 z-30" onClick={() => setShowDropdown(false)}></div>
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-slate-100 py-2 z-40">
                   <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-sm font-semibold text-slate-800">{dummyUser.nama_lengkap}</p>
-                    <p className="text-xs text-slate-500">Kelas {dummyUser.kelas}</p>
+                    <p className="text-sm font-semibold text-slate-800">{me.nama_lengkap}</p>
+                    <p className="text-xs text-slate-500">Kelas {me.kelas}</p>
                   </div>
                   <button
                     onClick={() => { setShowDropdown(false); setShowProfile(true); }}
@@ -957,12 +980,12 @@ const SoalPage = () => {
 
             <div className="flex justify-center mb-4">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                {dummyUser.nama_lengkap.charAt(0)}
+                {me.nama_lengkap.charAt(0)}
               </div>
             </div>
 
-            <h2 className="text-lg font-bold text-slate-800 text-center mb-1">{dummyUser.nama_lengkap}</h2>
-            <p className="text-sm text-blue-600 font-medium text-center mb-4">Siswa Kelas {dummyUser.kelas}</p>
+            <h2 className="text-lg font-bold text-slate-800 text-center mb-1">{me.nama_lengkap}</h2>
+            <p className="text-sm text-blue-600 font-medium text-center mb-4">Siswa Kelas {me.kelas}</p>
 
             <div className="space-y-3 bg-slate-50 rounded-2xl p-4">
               <div className="flex items-center gap-3">
@@ -973,7 +996,7 @@ const SoalPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Username</p>
-                  <p className="text-sm font-medium text-slate-700">@{dummyUser.username}</p>
+                  <p className="text-sm font-medium text-slate-700">@{me.username}</p>
                 </div>
               </div>
 
@@ -985,7 +1008,7 @@ const SoalPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Email</p>
-                  <p className="text-sm font-medium text-slate-700">{dummyUser.email}</p>
+                  <p className="text-sm font-medium text-slate-700">{me.email}</p>
                 </div>
               </div>
 
@@ -997,7 +1020,7 @@ const SoalPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Kelas</p>
-                  <p className="text-sm font-medium text-slate-700">{dummyUser.kelas}</p>
+                  <p className="text-sm font-medium text-slate-700">{me.kelas}</p>
                 </div>
               </div>
             </div>
