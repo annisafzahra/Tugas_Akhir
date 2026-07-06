@@ -6,18 +6,36 @@ import { userGetType } from "@/type/userGetType";
 import { useEffect, useState } from "react";
 
 export const CreateUser = async (data: registerType) => {
-    try{
-        const res = await register(data);
-        if(res.status === 201){
-            return true
-        }
-        if(res.status === 400){
-            return 'User sudah terdaftar, ganti username dan email'
-        }
-    }catch(e){
-        return e;
+  try {
+    const res = await register(data);
+
+    if (res.status === 201) {
+      return {
+        success: true,
+        data: res.data,
+      };
     }
-}
+
+    return {
+      success: false,
+      message: 'Register gagal.',
+    };
+  } catch (e: any) {
+    console.log('ERROR REGISTER:', e.response?.data || e);
+
+    if (e.response?.status === 400) {
+      return {
+        success: false,
+        message: 'User sudah terdaftar, ganti username dan email.',
+      };
+    }
+
+    return {
+      success: false,
+      message: 'Terjadi kesalahan koneksi atau server.',
+    };
+  }
+};
 
 export const loginUser = async (data: loginType) => {
     try{

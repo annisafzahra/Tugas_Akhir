@@ -24,13 +24,14 @@ const RegisterPage = ({ goLogin, afterRegister }: any) => {
       alert('Mohon isi semua data.');
       return;
     }
-
+  
     if (password !== confirmPassword) {
       alert('Password dan konfirmasi password tidak sesuai.');
       return;
     }
-
+  
     setisLoading(true);
+  
     try {
       const res = await CreateUser({
         nama_lengkap: nama,
@@ -41,15 +42,24 @@ const RegisterPage = ({ goLogin, afterRegister }: any) => {
         email: email,
         password: password,
       });
-
-      if (res) {
+  
+      console.log('HASIL REGISTER:', res);
+  
+      if (res.success) {
+        const userId = res.data?.user?.id || res.data?.id;
+  
+        if (userId) {
+          localStorage.setItem('user_id_jurusan', userId.toString());
+        }
+  
         alert('Register berhasil! Silakan login.');
         afterRegister();
       } else {
-        alert(res || 'Terjadi kesalahan saat register.');
+        alert(res.message || 'Terjadi kesalahan saat register.');
       }
     } catch (error) {
-      alert('Terjadi kesalahan koneksi.');
+      console.log('ERROR HANDLE REGISTER:', error);
+      alert('Terjadi kesalahan sistem.');
     } finally {
       setisLoading(false);
     }
