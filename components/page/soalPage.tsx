@@ -9,11 +9,11 @@ import { useRouter } from 'next/navigation';
 import { UserType } from '@/type/dataHasilTestType';
 
 const pilihanRiasec = [
-  { label: 'A', nilai: 5, text: 'Sangat Suka' },
-  { label: 'B', nilai: 4, text: 'Suka' },
+  { label: 'A', nilai: 5, text: 'Sangat Setuju' },
+  { label: 'B', nilai: 4, text: 'Setuju' },
   { label: 'C', nilai: 3, text: 'Netral' },
-  { label: 'D', nilai: 2, text: 'Tidak Suka' },
-  { label: 'E', nilai: 1, text: 'Sangat Tidak Suka' },
+  { label: 'D', nilai: 2, text: 'Tidak Setuju' },
+  { label: 'E', nilai: 1, text: 'Sangat Tidak Setuju' },
 ];
 
 // const me = {
@@ -657,7 +657,7 @@ const SoalPage = () => {
                       <div>
                         <h3 className="font-semibold text-slate-800 text-sm mb-1">Tes Minat (RIASEC)</h3>
                         <p className="text-xs text-slate-600 leading-relaxed">
-                          Jawablah sesuai dengan perasaanmu yang sebenarnya. Tidak ada jawaban benar atau salah. Pilih dari Sangat Suka sampai Sangat Tidak Suka.
+                          Jawablah sesuai dengan perasaanmu yang sebenarnya. Tidak ada jawaban benar atau salah. Pilih dari Sangat Setuju sampai Sangat Tidak Setuju.
                         </p>
                       </div>
                     </div>
