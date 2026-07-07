@@ -1,19 +1,12 @@
-'use client';
-
-import HasilPage from '@/components/page/hasilPage';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import HasilClient from './HasilClient';
 
 const Page = () => {
-  const searchParams = useSearchParams();
-
-  const data = {
-    akademik: searchParams.get('akademik') || '-',
-    riasec: searchParams.get('riasec') || '-',
-    bakat: searchParams.get('bakat') || '-',
-    gabungan: searchParams.get('gabungan') || '-',
-  };
-
-  return <HasilPage data={data} />;
+  return (
+    <Suspense fallback={<div>Memuat hasil...</div>}>
+      <HasilClient />
+    </Suspense>
+  );
 };
 
 export default Page;
