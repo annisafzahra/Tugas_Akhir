@@ -826,7 +826,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
                       <div className="rounded-2xl bg-white p-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          Kelamin
+                          Jenis Kelamin
                         </p>
                         <p className="mt-1 text-sm font-bold capitalize text-slate-700">
                           {selected.kelamin || '-'}
