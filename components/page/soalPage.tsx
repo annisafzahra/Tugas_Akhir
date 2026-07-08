@@ -540,7 +540,9 @@ const SoalPage = () => {
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                   <span>{stepIcons[step - 1]}</span>
-                  Step {step}
+                  {step === 1 && 'Step 1 Nilai Akademik'}
+                  {step === 2 && 'Step 2 Tes Minat (RIASEC)'}
+                  {step === 3 && 'Step 3 Tes Bakat'}
                 </h2>
                 <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
                   {step}/3
