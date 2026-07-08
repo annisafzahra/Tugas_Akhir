@@ -675,9 +675,6 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => setSelected(null)} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5">
-                    Tutup Detail
-                  </button>
                 </div>
               </div>
             </div>
