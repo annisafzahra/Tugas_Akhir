@@ -62,6 +62,8 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
   const { hasilTest } = dataHasilTest();
   const { dataUser } = dataUserFunction();
 
+  const [hasilList, setHasilList] = useState<any[]>([]);
+
   const [selected, setSelected] = useState<UserType | null>(null);
   const [siswaList, setSiswaList] = useState<UserType[]>([]);
   const [siswaList2, setSiswaList2] = useState<UserType[]>([]);
@@ -110,18 +112,23 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
   }, [])
 
   useEffect(() => {
+    setHasilList(hasilTest || []);
+  }, [hasilTest]);
+
+  useEffect(() => {
     setSiswaList(dataUser || []);
   }, [dataUser]);
 
   const getHasilSiswa = (siswa: UserType) => {
-    return hasilTest.find(
+    return hasilList.find(
       (item) =>
+        item.user?.id === siswa.id ||
         item.user?.nama_lengkap?.toLowerCase() === siswa.nama_lengkap?.toLowerCase()
     );
   };
 
   const getHasilListSiswa = (siswa: UserType) => {
-    return hasilTest.filter((item) => {
+    return hasilList.filter((item) => {
       const sameId = item.user?.id && siswa.id && item.user.id === siswa.id;
   
       const sameName =
@@ -351,20 +358,33 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
     }
   };
 
-  const handleDeteletHasilTes = async (hasilId: number) => {
+  const handleDeleteHasilTes = async (hasilId: number) => {
+    if (!hasilId) return;
+  
     setIsLoading(true);
-    try{
+  
+    try {
       const res = await deleteHasilTes(hasilId);
-      if(res){
-        alert('Hasil tes berhasil dihapus');
-        router.refresh();
+  
+      if (res.status === 200 || res.status === 204) {
+        setHasilList((prev) =>
+          prev.filter((hasil) => hasil.id !== hasilId)
+        );
+  
+        setConfirmDelete(false);
+        setPickHapus(0);
+  
+        alert('Hasil tes berhasil dihapus.');
+      } else {
+        alert('Gagal menghapus hasil tes.');
       }
-    }finally{
-      setConfirmDelete(false);
-      setSelected(null);
+    } catch (error: any) {
+      console.error(error.response?.data || error);
+      alert('Gagal menghapus hasil tes.');
+    } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   const handleLogout = () => {
     removeToken();
@@ -740,8 +760,11 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                         </div>
 
                         {/* NILAI RINGKAS */}
-                        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 text-xs md:grid-cols-5">
-                          <div className="rounded-xl bg-slate-50 p-2">
+                        <div 
+                          // className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 text-xs md:grid-cols-5"
+                          className="w-full mt-4 flex flex-row justify-end  gap-2 border-t border-slate-100 pt-4 text-xs md:grid-cols-5"
+                        >
+                          {/* <div className="rounded-xl bg-slate-50 p-2">
                             <p className="text-slate-400">MTK</p>
                             <p className="font-bold text-slate-700">{hasil.mtk ?? '-'}</p>
                           </div>
@@ -756,8 +779,8 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                           <div className="rounded-xl bg-slate-50 p-2">
                             <p className="text-slate-400">IPS</p>
                             <p className="font-bold text-slate-700">{hasil.ips ?? '-'}</p>
-                          </div>
-                          <button onClick={()=>{setConfirmDelete(true); setPickHapus(hasil.id)}} className="flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-[#ff1265] text-sm font-extrabold text-white shadow-lg shadow-blue-100 hover:from-[#de004e] hover:to-[#de004e] hover:cursor-pointer transition">
+                          </div> */}
+                          <button onClick={()=>{setConfirmDelete(true); setPickHapus(hasil.id)}} className="flex shrink-0 items-center justify-center rounded-xl px-6 py-2 bg-gradient-to-br from-red-500 to-[#ff1265] text-sm font-extrabold text-white shadow-lg shadow-blue-100 hover:from-[#de004e] hover:to-[#de004e] hover:cursor-pointer transition">
                               Hapus
                             </button>
                         </div>
@@ -955,7 +978,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                   Batal
                 </button>
                 <button
-                  onClick={()=>{handleDeteletHasilTes(pickHapus)}}
+                  onClick={()=>{handleDeleteHasilTes(pickHapus)}}
                   className="flex-1 rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-100 transition hover:bg-red-600"
                 >
                   {isLoading?"Hapus...":"Hapus"}
