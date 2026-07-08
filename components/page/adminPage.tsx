@@ -1016,12 +1016,12 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 {formMode === 'tambah' ? 'Tambah Data' : 'Edit Data'}
               </p>
               <h2 className="mt-1 text-xl font-bold text-slate-900">
-                {formMode === 'tambah' ? 'Tambah Siswa Baru' : 'Edit Data Siswa'}
+                {formMode === 'tambah' ? 'Tambah Siswa Baru' : (formData.is_staff === true ? 'Edit Data Admin' : 'Edit Data Siswa')}
               </h2>
               <p className="text-sm text-slate-500">
                 {formMode === 'tambah'
                   ? 'Lengkapi data akun dan identitas siswa.'
-                  : 'Perbarui data siswa yang dipilih.'}
+                  : (formData.is_staff === true ? 'Perbarui data admin yang ingin di ganti.' : 'Perbarui data siswa yang dipilih.')}
               </p>
             </div>
 
