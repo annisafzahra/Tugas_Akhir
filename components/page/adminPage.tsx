@@ -354,7 +354,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-500">Admin Panel</p>
               <h1 className="text-lg font-bold text-slate-900 md:text-xl">Dashboard Admin</h1>
-              <p className="text-sm text-slate-500">Kelola data siswa dan pantau hasil rekomendasi tes.</p>
+              <p className="text-sm text-slate-500">Kelola data siswa dan pantau hasil rekomendasi tes</p>
             </div>
           </div>
 
@@ -583,8 +583,15 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
           <div className="relative z-[101] flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-900/20">
             <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-indigo-50 px-10 py-6">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-500">Detail Hasil Tes</p>
-                <h2 className="mt-1 text-xl font-bold text-slate-900">Riwayat Rekomendasi Jurusan</h2>
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-500">
+                  Detail Hasil Tes
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                  Riwayat Rekomendasi Jurusan
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Berikut daftar hasil tes yang pernah dikerjakan oleh siswa
+                </p>
               </div>
               <button onClick={() => setSelected(null)} className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition hover:bg-slate-100">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,7 +611,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                               {index + 1}
                             </div>
                             <div>
-                              <p className="text-xs font-bold uppercase text-slate-400">Rekomendasi Gabungan</p>
+                              <p className="text-xs font-bold uppercase text-slate-400">Rekomendasi Utama</p>
                               <h4 className="mt-1 text-xl font-extrabold text-slate-900">{hasil.rekomendasi_gabungan || '-'}</h4>
                               <p className="mt-1 text-xs text-slate-400">Tanggal: {formatTanggal(hasil.created_at)}</p>
                             </div>
@@ -666,16 +673,6 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                         <p className="text-xs text-slate-400">Kelamin</p>
                         <p className="text-sm font-bold capitalize">{selected.kelamin || '-'}</p>
                       </div>
-                    </div>
-                  </div>
-                  <div className="mt-5 grid grid-cols-2 gap-3">
-                    <div className="rounded-2xl bg-emerald-50 p-4">
-                      <p className="text-2xl font-extrabold text-emerald-600">{selectedHasilList.length}</p>
-                      <p className="text-xs font-semibold text-emerald-700">Total Tes</p>
-                    </div>
-                    <div className="rounded-2xl bg-blue-50 p-4">
-                      <p className="text-md font-extrabold text-blue-600">{formatTanggal(selectedHasilList[0]?.created_at)}</p>
-                      <p className="text-xs font-semibold text-blue-700">Tes Terakhir</p>
                     </div>
                   </div>
                   <button onClick={() => setSelected(null)} className="mt-5 w-full rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5">
