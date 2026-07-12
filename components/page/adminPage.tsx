@@ -397,7 +397,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
             {showDropdown && (
               <>
                 <div className="fixed inset-0 z-[80]" onClick={() => setShowDropdown(false)} />
-                <div className="absolute lg:right-0 lg:top-[52px] top-[45px] left-[20px] z-[90] w-56 overflow-hidden rounded-2xl border-[.5px] border-blue-500 bg-white shadow-2xl shadow-slate-200 md:top-[60px] md:w-64 md:rounded-3xl">
+                <div className="absolute lg:right-0 lg:top-[52px] top-[35px] left-[30px] z-[90] w-56 overflow-hidden rounded-2xl border-[.5px] border-blue-500 bg-white shadow-2xl shadow-slate-200 md:top-[60px] md:w-64 md:rounded-3xl">
                   <div className="border-b border-slate-100 p-3 md:p-4">
                     <p className="truncate text-sm font-bold text-slate-800">{me.nama_lengkap || 'Admin'}</p>
                     <p className="truncate text-xs text-slate-500">{me.email || '-'}</p>
