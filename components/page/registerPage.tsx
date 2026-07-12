@@ -1,5 +1,6 @@
 'use client';
 
+import { setToken } from '@/lib/function/token';
 import { CreateUser } from '@/lib/function/userFunction';
 import React, { useState } from 'react';
 
@@ -50,6 +51,7 @@ const RegisterPage = ({ goLogin, afterRegister }: any) => {
   
         if (userId) {
           localStorage.setItem('user_id_jurusan', userId.toString());
+          setToken(res.data.token);
         }
   
         alert('Register berhasil! Silakan login.');
