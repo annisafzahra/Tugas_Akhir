@@ -51,25 +51,89 @@ const SoalPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAnswerCheck, setShowAnswerCheck] = useState(false);
 
+  const [isDraftLoaded, setIsDraftLoaded] = useState(false);
+
+  const getDraftKey = () => {
+    const userId = localStorage.getItem('user_id_jurusan');
+    return `draft_soal_jurusan_${userId || 'guest'}`;
+  };
+
+  const defaultRiasecAnswers = () =>
+    soalList.map((item) => ({
+      soal_id: item.id,
+      nilai: 0,
+    }));
+
+  const defaultBakatAnswers = () =>
+    soalBakat.map((item) => ({
+      soal_id: item.id,
+      jawaban: '',
+      nilai: 0,
+    }));
+
   // ===== REFS UNTUK SCROLL =====
   const contentRef = useRef<HTMLDivElement>(null);
   const soalRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  const allowLeaveRef = useRef(false);
+
   useEffect(() => {
-    setJawabanRiasec(
-      soalList.map((item) => ({
-        soal_id: item.id,
-        nilai: 0,
-      }))
-    );
-    setJawabanBakat(
-      soalBakat.map((item) => ({
-        soal_id: item.id,
-        jawaban: '',
-        nilai: 0,
-      }))
-    );
+    const savedDraft = localStorage.getItem(getDraftKey());
+  
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+  
+        setStep(draft.step || 1);
+  
+        setAkademik(
+          draft.akademik || {
+            mtk: 0,
+            indo: 0,
+            ipa: 0,
+            ips: 0,
+          }
+        );
+  
+        setJawabanRiasec(
+          draft.jawabanRiasec?.length
+            ? draft.jawabanRiasec
+            : defaultRiasecAnswers()
+        );
+  
+        setJawabanBakat(
+          draft.jawabanBakat?.length
+            ? draft.jawabanBakat
+            : defaultBakatAnswers()
+        );
+      } catch (error) {
+        console.log('Draft rusak, reset ulang:', error);
+  
+        localStorage.removeItem(getDraftKey());
+  
+        setJawabanRiasec(defaultRiasecAnswers());
+        setJawabanBakat(defaultBakatAnswers());
+      }
+    } else {
+      setJawabanRiasec(defaultRiasecAnswers());
+      setJawabanBakat(defaultBakatAnswers());
+    }
+  
+    setIsDraftLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!isDraftLoaded) return;
+  
+    const draft = {
+      step,
+      akademik,
+      jawabanRiasec,
+      jawabanBakat,
+    };
+  
+    localStorage.setItem(getDraftKey(), JSON.stringify(draft));
+  }, [step, akademik, jawabanRiasec, jawabanBakat, isDraftLoaded]);
 
   useEffect(()=>{
     const fetch = async () => {
@@ -82,6 +146,27 @@ const SoalPage = () => {
     }
     fetch()
   }, [])
+
+  useEffect(() => {
+    // Tambah history palsu supaya tombol back bisa dicegat
+    window.history.pushState({ page: 'soal' }, '', window.location.href);
+  
+    const handleBrowserBack = () => {
+      if (allowLeaveRef.current) return;
+  
+      // Tahan user tetap di halaman soal
+      window.history.pushState({ page: 'soal' }, '', window.location.href);
+  
+      // Tampilkan popup konfirmasi
+      setShowLogout(true);
+    };
+  
+    window.addEventListener('popstate', handleBrowserBack);
+  
+    return () => {
+      window.removeEventListener('popstate', handleBrowserBack);
+    };
+  }, []);
 
   // ===== SCROLL TO TOP SAAT PINDAH STEP =====
   useEffect(() => {
@@ -264,7 +349,11 @@ const SoalPage = () => {
   };
 
   const handleLogout = () => {
-    // alert('Logout berhasil! (Nanti redirect ke halaman login)');
+    allowLeaveRef.current = true;
+  
+    const userId = localStorage.getItem('user_id_jurusan');
+    localStorage.removeItem(`draft_soal_jurusan_${userId || 'guest'}`);
+  
     setShowLogout(false);
     router.push('/');
   };
@@ -314,14 +403,16 @@ const SoalPage = () => {
       if (response.status === 201) {
         const result = response.data;
         console.log('✅ Response dari backend:', result);
-    
+      
+        localStorage.removeItem(getDraftKey());
+      
         const params = new URLSearchParams({
           akademik: result.rekomendasi_akademik || '-',
           riasec: result.rekomendasi_riasec || '-',
           bakat: result.rekomendasi_bakat || '-',
           gabungan: result.rekomendasi_gabungan || '-',
         });
-    
+      
         router.push(`/hasil?${params.toString()}`);
       }
     } catch (error: any) {
@@ -1050,7 +1141,7 @@ const SoalPage = () => {
 
             <h2 className="text-lg font-bold text-slate-800 mb-2">Konfirmasi Logout</h2>
             <p className="text-sm text-slate-500 mb-6">
-              Apakah kamu yakin ingin keluar? Progress tes yang belum disubmit akan hilang.
+              Apakah kamu yakin ingin keluar dari halaman tes? Jawaban yang sudah diisi akan tetap tersimpan sebagai draft.
             </p>
 
             <div className="flex gap-3">
