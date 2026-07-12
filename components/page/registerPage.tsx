@@ -1,7 +1,7 @@
 'use client';
 
 import { setToken } from '@/lib/function/token';
-import { CreateUser } from '@/lib/function/userFunction';
+import { CreateUser, loginUser } from '@/lib/function/userFunction';
 import React, { useState } from 'react';
 
 const RegisterPage = ({ goLogin, afterRegister }: any) => {
@@ -34,7 +34,7 @@ const RegisterPage = ({ goLogin, afterRegister }: any) => {
     setisLoading(true);
   
     try {
-      const res = await CreateUser({
+      const registerRes = await CreateUser({
         nama_lengkap: nama,
         kelas: kelas,
         usia: Number(usia),
@@ -44,20 +44,28 @@ const RegisterPage = ({ goLogin, afterRegister }: any) => {
         password: password,
       });
   
-      console.log('HASIL REGISTER:', res);
+      console.log('HASIL REGISTER:', registerRes);
   
-      if (res.success) {
-        const userId = res.data?.user?.id || res.data?.id;
+      if (!registerRes.success) {
+        alert(registerRes.message || 'Register gagal.');
+        return;
+      }
   
-        if (userId) {
-          localStorage.setItem('user_id_jurusan', userId.toString());
-          setToken(res.data.token);
-        }
+      const loginRes = await loginUser({
+        username: username,
+        password: password,
+      });
   
-        alert('Register berhasil! Silakan login.');
+      console.log('HASIL LOGIN SETELAH REGISTER:', loginRes);
+  
+      if (loginRes?.token && loginRes?.user?.id) {
+        localStorage.setItem('user_id_jurusan', loginRes.user.id.toString());
+  
+        alert('Register berhasil!');
         afterRegister();
       } else {
-        alert(res.message || 'Terjadi kesalahan saat register.');
+        alert('Register berhasil, tetapi login otomatis gagal. Silakan login manual.');
+        goLogin();
       }
     } catch (error) {
       console.log('ERROR HANDLE REGISTER:', error);
