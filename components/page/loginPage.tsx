@@ -32,7 +32,7 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
           onLogin();
         }
       } else {
-        alert(res);
+        // alert(res);
       }
     } catch (err: any) {
       console.error('Login gagal:', err);
