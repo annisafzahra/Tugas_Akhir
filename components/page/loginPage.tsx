@@ -185,6 +185,11 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
               </button>
             </div>
           </div>
+          {error && (
+            <div className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-600">
+              {error}
+            </div>
+          )}
 
           {/* Button Section */}
           <button
