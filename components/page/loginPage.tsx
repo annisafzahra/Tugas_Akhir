@@ -11,6 +11,7 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -33,6 +34,16 @@ const LoginPage = ({ goRegister, onLogin, onAdminLogin }: any) => {
       } else {
         alert(res);
       }
+    } catch (err: any) {
+      console.error('Login gagal:', err);
+  
+      const message =
+        err?.response?.data?.non_field_errors?.[0] ||
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        'Username atau password salah.';
+  
+      setError(message);
     } finally {
       setIsLoading(false);
     }
