@@ -48,10 +48,10 @@ export const loginUser = async (data: loginType) => {
             return 'Username atau password salah'
         }
     }catch(e: any){
-        alert(`ERROR FULL: ${e}`);
-        alert(`ERROR RESPONSE: ${e?.response}`);
-        alert(`ERROR MESSAGE: ${e?.message}`);
-        alert(e?.message);
+        // alert(`ERROR FULL: ${e}`);
+        // alert(`ERROR RESPONSE: ${e?.response}`);
+        // alert(`ERROR MESSAGE: ${e?.message}`);
+        // alert(e?.message);
         throw e;
     }
 }
