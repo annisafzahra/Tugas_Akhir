@@ -10,6 +10,14 @@ import { CreateUser } from '@/lib/function/userFunction';
 import { UserType } from '@/type/dataHasilTestType';
 
 type FormMode = 'tambah' | 'edit';
+type StatusType = 'success' | 'error';
+
+type StatusPopupState = {
+  show: boolean;
+  type: StatusType;
+  title: string;
+  message: string;
+};
 
 type FormState = {
   id: number;
@@ -23,6 +31,13 @@ type FormState = {
   is_staff: boolean;
   password: string;
   confirmPassword: string;
+};
+
+const initialStatusPopup: StatusPopupState = {
+  show: false,
+  type: 'success',
+  title: '',
+  message: '',
 };
 
 const initialForm: FormState = {
@@ -64,6 +79,8 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
   const [showLogout, setShowLogout] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [statusPopup, setStatusPopup] =
+    useState<StatusPopupState>(initialStatusPopup);
 
   const [formMode, setFormMode] = useState<FormMode>('tambah');
   const [formData, setFormData] = useState<FormState>(initialForm);
@@ -152,6 +169,74 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const selectedHasilList = selected ? getHasilListSiswa(selected) : [];
 
+  const showStatusPopup = (
+    type: StatusType,
+    title: string,
+    message: string
+  ) => {
+    setStatusPopup({
+      show: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const closeStatusPopup = () => {
+    setStatusPopup(initialStatusPopup);
+  };
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    const apiError = error as {
+      response?: {
+        data?: {
+          message?: string;
+          detail?: string;
+          non_field_errors?: string[];
+          username?: string[] | string;
+          email?: string[] | string;
+        } | string;
+      };
+      message?: string;
+    };
+
+    const responseData = apiError?.response?.data;
+
+    if (typeof responseData === 'string') {
+      return responseData;
+    }
+
+    if (responseData?.message) {
+      return responseData.message;
+    }
+
+    if (responseData?.detail) {
+      return responseData.detail;
+    }
+
+    if (responseData?.non_field_errors?.[0]) {
+      return responseData.non_field_errors[0];
+    }
+
+    if (Array.isArray(responseData?.username) && responseData.username[0]) {
+      return responseData.username[0];
+    }
+
+    if (typeof responseData?.username === 'string') {
+      return responseData.username;
+    }
+
+    if (Array.isArray(responseData?.email) && responseData.email[0]) {
+      return responseData.email[0];
+    }
+
+    if (typeof responseData?.email === 'string') {
+      return responseData.email;
+    }
+
+    return apiError?.message || fallback;
+  };
+
   const handleChange = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     setFormErrors((prev) => ({ ...prev, [key]: '' }));
@@ -230,6 +315,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const handleCreate = async () => {
     if (!validateForm()) return;
+
     setIsLoading(true);
 
     try {
@@ -244,16 +330,35 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       });
 
       if (!res || res.success === false) {
-        alert(res?.message || 'Gagal menambahkan siswa.');
+        showStatusPopup(
+          'error',
+          'Tambah Siswa Gagal',
+          res?.message || 'Data siswa gagal ditambahkan.'
+        );
         return;
       }
 
-      alert('Data siswa berhasil ditambahkan.');
       setShowFormModal(false);
       resetForm();
+
+      showStatusPopup(
+        'success',
+        'Tambah Siswa Berhasil',
+        'Data siswa baru berhasil ditambahkan.'
+      );
+
       router.refresh();
-    } catch {
-      alert('Terjadi kesalahan koneksi.');
+    } catch (error) {
+      console.error('Tambah siswa gagal:', error);
+
+      showStatusPopup(
+        'error',
+        'Tambah Siswa Gagal',
+        getErrorMessage(
+          error,
+          'Terjadi kesalahan saat menambahkan siswa. Silakan coba lagi.'
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -277,27 +382,56 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       };
 
       const res = await updateSiswa(updateTarget, payload);
-      if (res.status === 200) {
-        const updatedUser = res.data.data || res.data;
 
-        if (formData.is_staff) {
-          setMe(updatedUser);
-        } else {
-          setSiswaList((prev) => prev.map((s) => (s.id === updateTarget ? updatedUser : s)));
-        }
-
-        setShowFormModal(false);
-        setUpdateTarget(0);
-        resetForm();
-        alert('Data berhasil diperbarui.');
-      } else {
-        alert('Gagal mengupdate data.');
+      if (res.status !== 200) {
+        showStatusPopup(
+          'error',
+          formData.is_staff ? 'Edit Admin Gagal' : 'Edit Siswa Gagal',
+          res.data?.message || 'Data gagal diperbarui.'
+        );
+        return;
       }
+
+      const updatedUser = res.data?.data || res.data;
+
+      if (formData.is_staff) {
+        setMe(updatedUser);
+      } else {
+        setSiswaList((prev) =>
+          prev.map((siswa) =>
+            siswa.id === updateTarget ? updatedUser : siswa
+          )
+        );
+      }
+
+      const updatedIsStaff = formData.is_staff;
+
+      setShowFormModal(false);
+      setUpdateTarget(0);
+      resetForm();
+
+      showStatusPopup(
+        'success',
+        updatedIsStaff ? 'Edit Admin Berhasil' : 'Edit Siswa Berhasil',
+        updatedIsStaff
+          ? 'Data profil admin berhasil diperbarui.'
+          : 'Data siswa berhasil diperbarui.'
+      );
 
       router.refresh();
     } catch (error) {
-      console.error(error);
-      alert('Gagal mengupdate data.');
+      console.error('Edit data gagal:', error);
+
+      showStatusPopup(
+        'error',
+        formData.is_staff ? 'Edit Admin Gagal' : 'Edit Siswa Gagal',
+        getErrorMessage(
+          error,
+          formData.is_staff
+            ? 'Terjadi kesalahan saat memperbarui data admin.'
+            : 'Terjadi kesalahan saat memperbarui data siswa.'
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -305,17 +439,42 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+
     setIsLoading(true);
 
     try {
+      const deletedStudentName =
+        deleteTarget.nama_lengkap || 'Siswa tersebut';
+
       await deleteSiswa(deleteTarget.id);
-      setSiswaList((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+
+      setSiswaList((prev) =>
+        prev.filter((siswa) => siswa.id !== deleteTarget.id)
+      );
+
       setShowDeleteModal(false);
       setDeleteTarget(null);
-      alert('Siswa berhasil dihapus.');
+
+      showStatusPopup(
+        'success',
+        'Hapus Siswa Berhasil',
+        `Data ${deletedStudentName} berhasil dihapus.`
+      );
+
       router.refresh();
-    } catch {
-      alert('Gagal menghapus siswa.');
+    } catch (error) {
+      console.error('Hapus siswa gagal:', error);
+
+      setShowDeleteModal(false);
+
+      showStatusPopup(
+        'error',
+        'Hapus Siswa Gagal',
+        getErrorMessage(
+          error,
+          'Terjadi kesalahan saat menghapus siswa. Silakan coba lagi.'
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -323,20 +482,48 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
   const handleDeleteHasilTes = async (hasilId: number) => {
     if (!hasilId) return;
+
     setIsLoading(true);
 
     try {
       const res = await deleteHasilTes(hasilId);
-      if (res.status === 200 || res.status === 204) {
-        setHasilList((prev) => prev.filter((h) => h.id !== hasilId));
+
+      if (res.status !== 200 && res.status !== 204) {
         setConfirmDelete(false);
-        setPickHapus(0);
-        alert('Hasil tes berhasil dihapus.');
-      } else {
-        alert('Gagal menghapus hasil tes.');
+
+        showStatusPopup(
+          'error',
+          'Hapus Riwayat Tes Gagal',
+          res.data?.message || 'Riwayat hasil tes gagal dihapus.'
+        );
+        return;
       }
-    } catch {
-      alert('Gagal menghapus hasil tes.');
+
+      setHasilList((prev) =>
+        prev.filter((hasil) => hasil.id !== hasilId)
+      );
+
+      setConfirmDelete(false);
+      setPickHapus(0);
+
+      showStatusPopup(
+        'success',
+        'Hapus Riwayat Tes Berhasil',
+        'Riwayat hasil tes berhasil dihapus.'
+      );
+    } catch (error) {
+      console.error('Hapus riwayat tes gagal:', error);
+
+      setConfirmDelete(false);
+
+      showStatusPopup(
+        'error',
+        'Hapus Riwayat Tes Gagal',
+        getErrorMessage(
+          error,
+          'Terjadi kesalahan saat menghapus riwayat hasil tes.'
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -993,6 +1180,87 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 {isLoading ? 'Menghapus...' : 'Ya, Hapus'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {statusPopup.show && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 md:p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+            onClick={closeStatusPopup}
+          />
+
+          <div className="relative z-[151] w-full max-w-sm overflow-hidden rounded-3xl bg-white p-5 text-center shadow-2xl shadow-slate-900/20 md:rounded-[2rem] md:p-7">
+            <div
+              className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl ${
+                statusPopup.type === 'success'
+                  ? 'bg-emerald-50 text-emerald-500'
+                  : 'bg-red-50 text-red-500'
+              }`}
+            >
+              {statusPopup.type === 'success' ? (
+                <svg
+                  className="h-9 w-9"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.3}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="h-9 w-9"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.3}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+            </div>
+
+            <p
+              className={`text-[10px] font-bold uppercase tracking-[0.18em] md:text-xs ${
+                statusPopup.type === 'success'
+                  ? 'text-emerald-500'
+                  : 'text-red-500'
+              }`}
+            >
+              {statusPopup.type === 'success'
+                ? 'Proses Berhasil'
+                : 'Proses Gagal'}
+            </p>
+
+            <h2 className="mt-2 text-lg font-bold text-slate-900 md:text-xl">
+              {statusPopup.title}
+            </h2>
+
+            <p className="mt-2 text-xs leading-5 text-slate-500 md:text-sm md:leading-6">
+              {statusPopup.message}
+            </p>
+
+            <button
+              type="button"
+              onClick={closeStatusPopup}
+              className={`mt-6 w-full rounded-xl px-4 py-2.5 text-xs font-semibold text-white shadow-lg transition hover:-translate-y-0.5 md:rounded-2xl md:py-3 md:text-sm ${
+                statusPopup.type === 'success'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200 hover:from-emerald-600 hover:to-teal-600'
+                  : 'bg-gradient-to-r from-red-500 to-rose-500 shadow-red-200 hover:from-red-600 hover:to-rose-600'
+              }`}
+            >
+              Tutup
+            </button>
           </div>
         </div>
       )}
