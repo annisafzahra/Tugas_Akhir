@@ -910,7 +910,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                         {isDetailTes === hasil.id && (
 
                           <div className="flex flex-col gap-3 h-[230px] mt-5 md:flex-row md:items-start md:justify-between items-start md:gap-4">
-                            <div className='p-4 h-full flex flex-col border-[.5px] border-blue-600 bg-blue-50 rounded-lg flex-1'>
+                            <div className='p-4 h-full flex flex-col border-[.5px] border-blue-400 bg-blue-50 rounded-lg flex-1'>
                               <p className='mb-2 font-bold text-blue-500'>Akademik</p>
                               <div className='flex flex-col gap-2'>
                                 <div className='w-full flex flex-row justify-between'>
@@ -931,7 +931,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                                 </div>
                               </div>
                             </div>
-                            <div className='p-4 h-full flex flex-col border-[.5px] border-purple-600 bg-purple-50 rounded-lg flex-1'>
+                            <div className='p-4 h-full flex flex-col border-[.5px] border-purple-400 bg-purple-50 rounded-lg flex-1'>
                               <p className='mb-2 font-bold text-purple-500'>Minat (RIASEC)</p>
                               <div className='flex flex-col gap-2'>
                                 <div className='w-full flex flex-row justify-between'>
@@ -960,7 +960,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                                 </div>
                               </div>
                             </div>
-                            <div className='p-4 h-full flex flex-col border-[.5px] border-emerald-600 bg-emerald-50 rounded-lg flex-1'>
+                            <div className='p-4 h-full flex flex-col border-[.5px] border-emerald-400 bg-emerald-50 rounded-lg flex-1'>
                               <p className='mb-2 font-bold text-emerald-500'>Bakat</p>
                               <div className='flex flex-col gap-2'>
                                 <div className='w-full flex flex-row justify-between'>
