@@ -94,6 +94,8 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [pickHapus, setPickHapus] = useState(0);
 
+  const [isDetailTes, setIsDetailTes] = useState(0);
+
   const [updateTarget, setUpdateTarget] = useState(0);
   const [me, setMe] = useState<UserType>({
     id: 0,
@@ -905,8 +907,92 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                             </div>
                           </div>
                         </div>
+                        {isDetailTes === hasil.id && (
 
-                        <div className="mt-3 flex justify-end border-t border-slate-100 pt-3 md:mt-4 md:pt-4">
+                          <div className="flex flex-col gap-3 h-[230px] mt-5 md:flex-row md:items-start md:justify-between items-start md:gap-4">
+                            <div className='p-4 h-full flex flex-col border-[.5px] border-blue-100 bg-blue-50 rounded-lg flex-1'>
+                              <p className='mb-2 font-bold text-blue-500'>Akademik</p>
+                              <div className='flex flex-col gap-2'>
+                                <div className='w-full flex flex-row justify-between'>
+                                  <p className='text-blue-800'>MTK :</p>
+                                  <p className='text-blue-800'>{hasil.mtk || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-blue-800'>Bahasa :</p>
+                                  <p className='text-blue-800'>{hasil.indo || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-blue-800'>IPA :</p>
+                                  <p className='text-blue-800'>{hasil.ipa || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-blue-800'>IPS :</p>
+                                  <p className='text-blue-800'>{hasil.ips || '-'}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className='p-4 h-full flex flex-col border-[.5px] border-purple-100 bg-purple-50 rounded-lg flex-1'>
+                              <p className='mb-2 font-bold text-purple-500'>Minat (RIASEC)</p>
+                              <div className='flex flex-col gap-2'>
+                                <div className='w-full flex flex-row justify-between'>
+                                  <p className='text-purple-800'>Realistic :</p>
+                                  <p className='text-purple-800'>{hasil.realistic || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-purple-800'>Investigative :</p>
+                                  <p className='text-purple-800'>{hasil.investigative || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-purple-800'>Artistic :</p>
+                                  <p className='text-purple-800'>{hasil.artistic || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-purple-800'>Social :</p>
+                                  <p className='text-purple-800'>{hasil.social || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-purple-800'>Enterprising :</p>
+                                  <p className='text-purple-800'>{hasil.enterprising || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-purple-800'>Conventional :</p>
+                                  <p className='text-purple-800'>{hasil.conventional || '-'}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className='p-4 h-full flex flex-col border-[.5px] border-emerald-100 bg-emerald-50 rounded-lg flex-1'>
+                              <p className='mb-2 font-bold text-emerald-500'>Bakat</p>
+                              <div className='flex flex-col gap-2'>
+                                <div className='w-full flex flex-row justify-between'>
+                                  <p className='text-emerald-800'>Logika :</p>
+                                  <p className='text-emerald-800'>{hasil.logika || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-emerald-800'>Verbal :</p>
+                                  <p className='text-emerald-800'>{hasil.verbal || '-'}</p>
+                                </div>
+                                <div className='flex flex-row justify-between'>
+                                  <p className='text-emerald-800'>Mekanikal :</p>
+                                  <p className='text-emerald-800'>{hasil.mekanikal || '-'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mt-3 flex gap-2 justify-end border-t border-slate-100 pt-3 md:mt-4 md:pt-4">
+                          <button
+                            onClick={() => {
+                              if(isDetailTes===hasil.id){
+                                setIsDetailTes(0);
+                              }else{
+                                setIsDetailTes(hasil.id);
+                              } 
+                            }}
+                            className="rounded-xl bg-gradient-to-br from-blue-500 to-[#1232ff] px-4 py-2 text-xs font-extrabold text-white shadow-lg transition hover:from-[#1025ad] hover:to-[#1025ad] md:px-6 md:text-sm"
+                          >
+                            {isDetailTes ? 'Tutup Detail Tes' : 'Lihat Detail Tes'}
+                          </button>
                           <button
                             onClick={() => {
                               setConfirmDelete(true);
