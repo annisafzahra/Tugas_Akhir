@@ -48,7 +48,7 @@ export default function Home() {
       {page === 'login' && (
         <LoginPage
           goRegister={() => setPage('register')}
-          onLogin={() => router.push('/soal')}
+          onLogin={() => router.push('/landing')}
           onAdminLogin={() => router.push('/admin')}
         />
       )}
