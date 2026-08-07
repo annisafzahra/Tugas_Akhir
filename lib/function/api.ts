@@ -45,6 +45,7 @@ export const getMe = (id: number) => api.get(`user/detail/${id}/`);
 // TES
 export const submitTes = (data: any) => api.post("tes/submit/", data);
 export const getHasilTes = () => api.get("tes/get/");
+export const getHasilTesSiswa = (id: number) => api.get(`tes/user/${id}`);
 export const getAdminSiswaList = () => api.get("admin/siswa/");
 export const getAdminSiswaDetail = (userId: number) => api.get(`admin/siswa/${userId}/`);
 export const deleteHasilTes = (id: number) => api.delete(`admin/delete-hasil/${id}/`);

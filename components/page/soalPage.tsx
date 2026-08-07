@@ -842,11 +842,11 @@ const SoalPage = () => {
                               {item.label}
                             </p>
 
-                            {nilai > 0 && (
+                            {/* {nilai > 0 && (
                               <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${info.bg} ${info.color}`}>
                                 {info.label}
                               </span>
-                            )}
+                            )} */}
                           </div>
 
                           {/* PILIH SEMESTER S1 - S6 */}

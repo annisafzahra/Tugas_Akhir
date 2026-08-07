@@ -9,12 +9,39 @@ import { useRouter } from 'next/navigation';
 import { UserType } from '@/type/dataHasilTestType';
 import dataHasilTest from '@/lib/function/dataHasilTest';
 import Image from 'next/image';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+
+const deskripsiJurusan: Record<string, string> = {
+    IPA: 'Jurusan ini sesuai bagi siswa yang menyukai sains, logika, dan pemecahan masalah secara sistematis.',
+    IPS: 'Jurusan ini sesuai bagi siswa yang tertarik mempelajari ekonomi, masyarakat, dan berbagai fenomena sosial.',
+    Bahasa: 'Jurusan ini sesuai bagi siswa yang menyukai komunikasi, literasi, serta pembelajaran bahasa dan budaya.',
+    AKL: 'Jurusan ini sesuai bagi siswa yang teliti dan tertarik pada bidang keuangan, administrasi, serta pengelolaan data.',
+    TKJ: 'Jurusan ini sesuai bagi siswa yang tertarik pada komputer, teknologi informasi, dan jaringan.',
+    TKRO: 'Jurusan ini sesuai bagi siswa yang menyukai dunia otomotif, mesin, dan teknologi kendaraan.',
+  };
+
+  const getDeskripsiJurusan = (
+    jurusan: string,
+    sumber: 'akademik' | 'minat' | 'bakat'
+  ) => {
+    const deskripsi = deskripsiJurusan[jurusan] || '';
+  
+    const prefixMap = {
+      akademik: `Berdasarkan hasil tes akademik, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}.`,
+      minat: `Berdasarkan hasil tes minat RIASEC, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}.`,
+      bakat: `Berdasarkan hasil tes bakat, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}.`,
+    };
+  
+    return `${prefixMap[sumber]} ${deskripsi}`;
+  };
 
 
 const LandingPage = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const { hasilTest } = dataHasilTest();
+  const [idNumber, setIdNumber] = useState(0);
+  const { hasilTestSiswa } = dataHasilTest(idNumber);
   const [jawabanRiasec, setJawabanRiasec] = useState<any[]>([]);
   const [jawabanBakat, setJawabanBakat] = useState<any[]>([]);
   const [akademik, setAkademik] = useState({
@@ -148,6 +175,7 @@ const LandingPage = () => {
       const res = await getMe(Number(id))
       if(res.status === 200){
         setMe(res.data);
+        setIdNumber(res.data.id);
         alert(`Selamat datang, ${res.data.nama_lengkap.split(' ')[0]}!`);
       }
     }
@@ -190,6 +218,682 @@ const LandingPage = () => {
   
     setShowLogout(false);
     router.push('/');
+  };
+
+  const handleDownloadPdf = async (hasil: any) => {
+    const akademik = hasil.rekomendasi_akademik || '-';
+    const riasec = hasil.rekomendasi_riasec || '-';
+    const bakat = hasil.rekomendasi_bakat || '-';
+  
+    // =====================================================
+    // DESKRIPSI JURUSAN
+    // Sama seperti yang ada di HasilPage
+    // =====================================================
+    const deskripsiJurusan: Record<string, string> = {
+      IPA:
+        'Jurusan ini sesuai bagi siswa yang menyukai sains, logika, dan pemecahan masalah secara sistematis.',
+  
+      IPS:
+        'Jurusan ini sesuai bagi siswa yang tertarik mempelajari ekonomi, masyarakat, dan berbagai fenomena sosial.',
+  
+      Bahasa:
+        'Jurusan ini sesuai bagi siswa yang menyukai komunikasi, literasi, serta pembelajaran bahasa dan budaya.',
+  
+      AKL:
+        'Jurusan ini sesuai bagi siswa yang teliti dan tertarik pada bidang keuangan, administrasi, serta pengelolaan data.',
+  
+      TKJ:
+        'Jurusan ini sesuai bagi siswa yang tertarik pada komputer, teknologi informasi, dan jaringan.',
+  
+      TKRO:
+        'Jurusan ini sesuai bagi siswa yang menyukai dunia otomotif, mesin, dan teknologi kendaraan.',
+    };
+  
+  
+    // =====================================================
+    // DESKRIPSI PER HASIL
+    // =====================================================
+    const getDeskripsi = (
+      jurusan: string,
+      sumber: 'akademik' | 'minat' | 'bakat'
+    ) => {
+      const deskripsi = deskripsiJurusan[jurusan] || '';
+  
+      if (sumber === 'akademik') {
+        return `Berdasarkan hasil tes akademik, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}. ${deskripsi}`;
+      }
+  
+      if (sumber === 'minat') {
+        return `Berdasarkan hasil tes minat RIASEC, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}. ${deskripsi}`;
+      }
+  
+      return `Berdasarkan hasil tes bakat, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}. ${deskripsi}`;
+    };
+  
+  
+    // =====================================================
+    // LOGIKA REKOMENDASI UTAMA
+    // mengikuti HasilPage
+    // =====================================================
+    const semuaSama =
+      akademik === riasec &&
+      riasec === bakat;
+  
+    const duaSama =
+      !semuaSama &&
+      (
+        akademik === riasec ||
+        akademik === bakat ||
+        riasec === bakat
+      );
+  
+  
+    let rekomendasiUtama = '';
+  
+    if (semuaSama) {
+      rekomendasiUtama = akademik;
+    }
+  
+    else if (duaSama) {
+      if (akademik === riasec) {
+        rekomendasiUtama = akademik;
+      }
+  
+      else if (akademik === bakat) {
+        rekomendasiUtama = akademik;
+      }
+  
+      else {
+        rekomendasiUtama = riasec;
+      }
+    }
+  
+    else {
+      rekomendasiUtama = akademik;
+    }
+  
+  
+    // =====================================================
+    // PENJELASAN REKOMENDASI UTAMA
+    // =====================================================
+    let penjelasanUtama = '';
+  
+    if (semuaSama) {
+      penjelasanUtama =
+        `Ketiga aspek (akademik, minat, dan bakat) menunjukkan hasil yang sama, yaitu ${rekomendasiUtama}. ` +
+        `Ini menandakan keselarasan yang kuat antara kemampuan, minat, dan bakat kamu.`;
+    }
+  
+    else if (duaSama) {
+      if (akademik === riasec) {
+        penjelasanUtama =
+          `Hasil akademik dan minat menunjukkan jurusan yang sama yaitu ${rekomendasiUtama}, sehingga menjadi rekomendasi utama.`;
+      }
+  
+      else if (akademik === bakat) {
+        penjelasanUtama =
+          `Hasil akademik dan bakat menunjukkan jurusan yang sama yaitu ${rekomendasiUtama}, sehingga menjadi rekomendasi utama.`;
+      }
+  
+      else {
+        penjelasanUtama =
+          `Hasil minat dan bakat menunjukkan jurusan yang sama yaitu ${rekomendasiUtama}, sehingga menjadi rekomendasi utama.`;
+      }
+    }
+  
+    else {
+      penjelasanUtama =
+        `Ketiga aspek (akademik, minat, dan bakat) menunjukkan hasil yang berbeda. ` +
+        `Rekomendasi utama diambil dari aspek akademik (${rekomendasiUtama}) karena nilai akademik merupakan data riil dari rapor yang mencerminkan kemampuan aktual siswa di sekolah.`;
+    }
+  
+  
+    // =====================================================
+    // DATA SISWA
+    // =====================================================
+    const nama =
+      hasil.user?.nama_lengkap ||
+      me.nama_lengkap ||
+      '-';
+  
+    const kelas =
+      hasil.user?.kelas ||
+      me.kelas ||
+      '-';
+  
+  
+    // =====================================================
+    // FORMAT TANGGAL
+    // contoh: 06-08-2026
+    // =====================================================
+    const tanggal = hasil.created_at
+      ? new Date(hasil.created_at)
+          .toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
+          .replace(/\//g, '-')
+      : '-';
+  
+  
+    // =====================================================
+    // BUAT HTML PDF
+    // =====================================================
+    const pdfElement = document.createElement('div');
+  
+    pdfElement.style.position = 'fixed';
+    pdfElement.style.left = '-99999px';
+    pdfElement.style.top = '0';
+  
+    /*
+      Ukuran sekitar A4 pada 96dpi.
+      Hasil akhirnya akan dimasukkan ke A4 jsPDF.
+    */
+    pdfElement.style.width = '794px';
+    pdfElement.style.minHeight = '1123px';
+  
+    pdfElement.style.background = '#ffffff';
+  
+    // kalau project kamu sudah pakai Poppins,
+    // html2canvas akan menangkap font ini.
+    pdfElement.style.fontFamily = 'Poppins, Arial, sans-serif';
+  
+    pdfElement.style.color = '#111111';
+  
+    pdfElement.innerHTML = `
+      <div
+        style="
+          width: 100%;
+          box-sizing: border-box;
+          padding: 66px 42px 50px 42px;
+          background: white;
+        "
+      >
+  
+        <!-- ============================= -->
+        <!-- HEADER -->
+        <!-- ============================= -->
+  
+        <div style="text-align:center;">
+          <h1
+            style="
+              margin:0;
+              color:#315f96;
+              font-size:22px;
+              font-weight:700;
+              line-height:1.2;
+            "
+          >
+            HASIL REKOMENDASI JURUSAN
+          </h1>
+  
+          <p
+            style="
+              margin:7px 0 0 0;
+              color:#64748b;
+              font-size:13px;
+              font-weight:400;
+            "
+          >
+            Berikut adalah rekomendasi jurusan berdasarkan data yang telah diisi
+          </p>
+        </div>
+  
+  
+        <!-- ============================= -->
+        <!-- IDENTITAS -->
+        <!-- ============================= -->
+  
+        <div
+          style="
+            margin-top:22px;
+            margin-left:10px;
+            font-size:13px;
+            line-height:1.65;
+          "
+        >
+  
+          <div style="display:flex;">
+            <div
+              style="
+                width:70px;
+                font-weight:700;
+              "
+            >
+              Nama
+            </div>
+  
+            <div style="width:12px;">
+              :
+            </div>
+  
+            <div>
+              ${nama}
+            </div>
+          </div>
+  
+  
+          <div style="display:flex;">
+            <div
+              style="
+                width:70px;
+                font-weight:700;
+              "
+            >
+              Kelas
+            </div>
+  
+            <div style="width:12px;">
+              :
+            </div>
+  
+            <div>
+              ${kelas}
+            </div>
+          </div>
+  
+  
+          <div style="display:flex;">
+            <div
+              style="
+                width:70px;
+                font-weight:700;
+              "
+            >
+              tanggal
+            </div>
+  
+            <div style="width:12px;">
+              :
+            </div>
+  
+            <div>
+              ${tanggal}
+            </div>
+          </div>
+  
+        </div>
+  
+  
+        <!-- ============================= -->
+        <!-- AKADEMIK -->
+        <!-- ============================= -->
+  
+        <div
+          style="
+            margin-top:34px;
+            border:1px solid #222222;
+          "
+        >
+  
+          <div
+              style="
+                  height:75px;
+                  box-sizing:border-box;
+                  padding:0px 12px;
+                  display:flex;
+                  flex-direction:column;
+                  justify-content:center;
+              "
+          >
+  
+            <div
+              style="
+                font-size:11px;
+                font-weight:700;
+              "
+            >
+              BERDASARKAN AKADEMIK
+            </div>
+  
+            <div
+                style="
+                    color:#2563eb;
+                    font-size:17px;
+                    font-weight:700;
+                    margin-bottom:8px;
+                    line-height:1.2;
+                "
+            >
+                ${akademik}
+            </div>
+  
+          </div>
+  
+  
+          <div
+            style="
+              border-top:1px solid #222222;
+              padding:0px 12px;
+              padding-bottom: 18px;
+              font-size:12.5px;
+              line-height:1.55;
+            "
+          >
+            ${getDeskripsi(
+              akademik,
+              'akademik'
+            )}
+          </div>
+  
+        </div>
+  
+  
+        <!-- ============================= -->
+        <!-- MINAT RIASEC -->
+        <!-- ============================= -->
+  
+        <div
+          style="
+            margin-top:28px;
+            border:1px solid #222222;
+          "
+        >
+  
+            <div
+                style="
+                    height:75px;
+                    box-sizing:border-box;
+                    padding:0px 12px;
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                "
+            >
+  
+            <div
+              style="
+                font-size:11px;
+                font-weight:700;
+              "
+            >
+              BERDASARKAN MINAT (RIASEC)
+            </div>
+  
+            <div
+                style="
+                    color:#2563eb;
+                    font-size:17px;
+                    font-weight:700;
+                    margin-bottom:8px;
+                    line-height:1.2;
+                "
+            >
+              ${riasec}
+            </div>
+  
+          </div>
+  
+  
+          <div
+            style="
+              border-top:1px solid #222222;
+              padding:0px 12px;
+              padding-bottom: 18px;
+              font-size:12.5px;
+              line-height:1.55;
+            "
+          >
+            ${getDeskripsi(
+              riasec,
+              'minat'
+            )}
+          </div>
+  
+        </div>
+  
+  
+        <!-- ============================= -->
+        <!-- BAKAT -->
+        <!-- ============================= -->
+  
+        <div
+          style="
+            margin-top:28px;
+            border:1px solid #222222;
+          "
+        >
+  
+            <div
+                style="
+                    height:75px;
+                    box-sizing:border-box;
+                    padding:0px 12px;
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                "
+            >
+  
+            <div
+              style="
+                font-size:11px;
+                font-weight:700;
+              "
+            >
+              BERDASARKAN BAKAT
+            </div>
+  
+            <div
+                style="
+                    color:#2563eb;
+                    font-size:17px;
+                    font-weight:700;
+                    margin-bottom:8px;
+                    line-height:1.2;
+                "
+            >
+              ${bakat}
+            </div>
+  
+          </div>
+  
+  
+          <div
+            style="
+              border-top:1px solid #222222;
+              padding:0px 12px;
+              padding-bottom: 18px;
+              font-size:12.5px;
+              line-height:1.55;
+            "
+          >
+            ${getDeskripsi(
+              bakat,
+              'bakat'
+            )}
+          </div>
+  
+        </div>
+  
+  
+        <!-- ============================= -->
+        <!-- REKOMENDASI UTAMA -->
+        <!-- ============================= -->
+  
+        <div
+          style="
+            margin-top:29px;
+          "
+        >
+  
+          <!-- HEADER BIRU -->
+          <div
+            style="
+              background:#568bc6;
+              height:35px;
+              display:flex;
+              justify-content:center;
+              align-items:center;
+              color:white;
+              font-size:14px;
+              font-weight:400;
+              padding-top:0px;
+              padding-bottom:15px;
+            "
+          >
+            REKOMENDASI UTAMA
+          </div>
+  
+  
+          <!-- HASIL BIRU MUDA -->
+          <div
+            style="
+              height:52px;
+              background:#dbe8f5;
+              border-left:1px solid #8db4dc;
+              border-right:1px solid #8db4dc;
+              border-bottom:1px solid #8db4dc;
+  
+              display:flex;
+              align-items:center;
+              justify-content:center;
+  
+              color:#0875bd;
+              font-size:22px;
+              font-weight:700;
+
+              padding-top:0px;
+              padding-bottom:20px;
+            "
+          >
+            ${rekomendasiUtama}
+          </div>
+  
+        </div>
+  
+  
+        <!-- ============================= -->
+        <!-- PENJELASAN UTAMA -->
+        <!-- ============================= -->
+  
+        <p
+          style="
+            margin:
+              17px
+              7px
+              0
+              7px;
+  
+            font-size:12.5px;
+            line-height:1.55;
+            color:#111111;
+          "
+        >
+          ${penjelasanUtama}
+        </p>
+  
+      </div>
+    `;
+  
+  
+    // masukkan sementara ke body
+    document.body.appendChild(pdfElement);
+  
+  
+    try {
+      // =====================================================
+      // HTML -> CANVAS
+      // =====================================================
+  
+      const canvas = await html2canvas(
+        pdfElement,
+        {
+          scale: 2.5,
+  
+          backgroundColor:
+            '#ffffff',
+  
+          useCORS: true,
+  
+          logging: false,
+  
+          windowWidth: 794,
+        }
+      );
+  
+  
+      // =====================================================
+      // CANVAS -> PDF A4
+      // =====================================================
+  
+      const imgData =
+        canvas.toDataURL(
+          'image/png',
+          1
+        );
+  
+  
+      const pdf =
+        new jsPDF(
+          'p',
+          'mm',
+          'a4'
+        );
+  
+  
+      const pdfWidth =
+        pdf.internal.pageSize.getWidth();
+  
+      const pdfHeight =
+        pdf.internal.pageSize.getHeight();
+  
+  
+      /*
+        Isi canvas dipasang memenuhi A4.
+        Karena HTML tadi sudah mengikuti rasio A4,
+        layout tidak berubah.
+      */
+      pdf.addImage(
+        imgData,
+        'PNG',
+        0,
+        0,
+        pdfWidth,
+        pdfHeight,
+        undefined,
+        'FAST'
+      );
+  
+  
+      // =====================================================
+      // NAMA FILE
+      // =====================================================
+  
+      const namaFile =
+        nama
+          .trim()
+          .replace(/\s+/g, '_')
+          .replace(
+            /[^a-zA-Z0-9_-]/g,
+            ''
+          );
+  
+  
+      pdf.save(
+        `Hasil_Rekomendasi_${namaFile}.pdf`
+      );
+  
+    }
+  
+    catch (error) {
+      console.error(
+        'Gagal membuat PDF:',
+        error
+      );
+  
+      alert(
+        'Gagal membuat PDF'
+      );
+    }
+  
+    finally {
+      // hapus element sementara
+      document.body.removeChild(
+        pdfElement
+      );
+    }
   };
 
 
@@ -338,7 +1042,7 @@ const LandingPage = () => {
                 >
 
                     {/* ================= IPA ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[530px] bg-white border border-blue-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[320px] max-w-[320px] min-h-[450px] bg-white border border-b-4 border-blue-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
                     <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-[28px] mb-5">
                         🔬
                     </div>
@@ -380,14 +1084,12 @@ const LandingPage = () => {
                         </ul>
                     </div>
 
-                    <button className="mt-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition">
-                        Lihat Detail
-                    </button>
+                    
                     </div>
 
 
                     {/* ================= IPS ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-orange-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-orange-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
                     <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-[28px] mb-5">
                         🌍
                     </div>
@@ -428,15 +1130,11 @@ const LandingPage = () => {
                         </li>
                         </ul>
                     </div>
-
-                    <button className="mt-auto w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-3 rounded-xl transition">
-                        Lihat Detail
-                    </button>
                     </div>
 
 
                     {/* ================= BAHASA ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-purple-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-purple-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
                     <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-[28px] mb-5">
                         📚
                     </div>
@@ -477,15 +1175,11 @@ const LandingPage = () => {
                         </li>
                         </ul>
                     </div>
-
-                    <button className="mt-auto w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-xl transition">
-                        Lihat Detail
-                    </button>
                     </div>
 
 
                     {/* ================= TKJ ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-cyan-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-cyan-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
                     <div className="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center text-[28px] mb-5">
                         💻
                     </div>
@@ -526,15 +1220,11 @@ const LandingPage = () => {
                         </li>
                         </ul>
                     </div>
-
-                    <button className="mt-auto w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 rounded-xl transition">
-                        Lihat Detail
-                    </button>
                     </div>
 
 
                     {/* ================= AKL ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-emerald-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-emerald-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
                     <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-[28px] mb-5">
                         💰
                     </div>
@@ -575,15 +1265,11 @@ const LandingPage = () => {
                         </li>
                         </ul>
                     </div>
-
-                    <button className="mt-auto w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl transition">
-                        Lihat Detail
-                    </button>
                     </div>
 
 
                     {/* ================= TKRO ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-red-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-red-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
                     <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-[28px] mb-5">
                         🚗
                     </div>
@@ -624,10 +1310,6 @@ const LandingPage = () => {
                         </li>
                         </ul>
                     </div>
-
-                    <button className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
-                        Lihat Detail
-                    </button>
                     </div>
 
                 </div>
@@ -644,8 +1326,8 @@ const LandingPage = () => {
                 {/* RIWAYAT */}
                 <div className='flex flex-col w-[60%] p-5 ml-10'>
                     <div className='w-full h-[350px] overflow-y-auto mt-3 flex flex-col gap-3'>
-                        {hasilTest.map((hasil: any, index: number) => (
-                            <div key={hasil.id || index} className="rounded-2xl border border-blue-300 bg-white p-3 shadow-sm md:rounded-[1.7rem] md:p-5 mb-3">
+                        {hasilTestSiswa.map((hasil: any, index: number) => (
+                            <div key={hasil.id || index} className="rounded-2xl border border-blue-300 bg-white p-3 shadow-sm md:rounded-[1.7rem] md:p-5">
                                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
                                 <div className="flex items-start gap-3 md:gap-4">
                                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-extrabold text-white md:h-10 md:w-10 md:text-sm">
@@ -748,13 +1430,10 @@ const LandingPage = () => {
 
                                 <div className="mt-3 flex gap-2 justify-end border-t border-slate-100 pt-3 md:mt-4 md:pt-4">
                                 <button
-                                    onClick={() => {
-                                    setConfirmDelete(true);
-                                    setPickHapus(hasil.id);
-                                    }}
-                                    className="rounded-xl bg-gradient-to-br from-red-500 to-[#c70462] px-4 py-2 text-xs font-extrabold text-white shadow-lg transition hover:from-[#c70462] hover:to-[#c70462] md:px-6 md:text-sm"
+                                onClick={() => handleDownloadPdf(hasil)}
+                                className="rounded-xl bg-gradient-to-br from-red-500 to-[#c70462] px-4 py-2 text-xs font-extrabold text-white shadow-lg transition hover:scale-105 md:px-6 md:text-sm"
                                 >
-                                    Download pdf
+                                Download PDF
                                 </button>
                                 </div>
                             </div>
