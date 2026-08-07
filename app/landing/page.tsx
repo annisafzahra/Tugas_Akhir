@@ -898,7 +898,7 @@ const LandingPage = () => {
 
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-100 via-white to-indigo-100 relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-100 via-white to-indigo-100 relative overflow-x-hidden">
       {/* Dekorasi Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
@@ -906,24 +906,24 @@ const LandingPage = () => {
       </div>
 
       {/* ===== TOP NAVBAR ===== */}
-      <div className="relative z-20 px-4 pt-4 pb-2">
-        <div className="flex lg:w-[70%] items-center justify-between mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+      <div className="relative z-20 px-3 pt-3 pb-2 sm:px-6 sm:pt-5 lg:px-8">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between rounded-2xl border border-white/70 bg-white/75 px-3 py-3 shadow-sm backdrop-blur-md sm:px-5">
+          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-200 sm:h-10 sm:w-10 sm:rounded-2xl">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">Tes Penjurusan</h1>
-              <p className="text-xs text-slate-500">Hai, {me.nama_lengkap.split(' ')[0]}</p>
+              <h1 className="truncate text-base font-bold text-slate-800 sm:text-lg">Tes Penjurusan</h1>
+              <p className="truncate text-[11px] text-slate-500 sm:text-xs">Hai, {me.nama_lengkap.split(' ')[0]}</p>
             </div>
           </div>
 
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 text-sm font-bold text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg sm:h-10 sm:w-10"
             >
               {me.nama_lengkap.charAt(0)}
             </button>
@@ -931,7 +931,7 @@ const LandingPage = () => {
             {showDropdown && (
               <>
                 <div className="fixed inset-0 z-30" onClick={() => setShowDropdown(false)}></div>
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-slate-100 py-2 z-40">
+                <div className="absolute right-0 z-40 mt-2 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-100 bg-white py-2 shadow-xl">
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="text-sm font-semibold text-slate-800">{me.nama_lengkap}</p>
                     <p className="text-xs text-slate-500">Kelas {me.kelas}</p>
@@ -999,23 +999,23 @@ const LandingPage = () => {
       
       
             {/* ===== DETAIL JURUSAN ===== */}
-            <div className="flex-1 flex items-center justify-center px-6 py-12 relative z-10">
-            <div className="w-full lg:w-[70%]">
+            <div className="relative z-10 flex items-center justify-center px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+            <div className="w-full max-w-6xl">
 
-                <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.7fr] gap-10 items-start">
+                <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[0.78fr_1.7fr] lg:gap-10">
 
                 {/* ===== BAGIAN KIRI ===== */}
-                <div className="flex flex-col pt-4">
-                    <p className=" text-blue-600 mb-3 w-[200px] text-center rounded-full bg-blue-100 border-[.5px] border-blue-500 px-6 py-2">
+                <div className="flex flex-col items-center pt-0 text-center lg:items-start lg:pt-4 lg:text-left">
+                    <p className="mb-3 w-fit rounded-full border border-blue-300 bg-blue-100 px-5 py-2 text-center text-sm font-semibold text-blue-600 sm:px-6">
                     Detail Jurusan
                     </p>
 
-                    <h2 className="text-[30px] font-bold text-slate-700 leading-[1.15] mb-5">
+                    <h2 className="mb-4 max-w-md text-[26px] font-bold leading-[1.15] text-slate-700 sm:text-[30px] lg:mb-5">
                     Kenali Jurusan yang
                     Sesuai dengan Dirimu
                     </h2>
 
-                    <p className="text-[15px] text-slate-500 leading-relaxed max-w-[320px]">
+                    <p className="max-w-md text-sm leading-relaxed text-slate-500 sm:text-[15px] lg:max-w-[320px]">
                     Setiap jurusan memiliki bidang pembelajaran dan karakteristik yang
                     berbeda. Kenali masing-masing jurusan agar kamu dapat memahami
                     pilihan yang sesuai dengan minat, kemampuan, dan bakatmu.
@@ -1026,12 +1026,15 @@ const LandingPage = () => {
                 <div
                     className="
                     flex
-                    gap-5
+                    w-full
+                    gap-4
                     overflow-x-auto
                     pb-5
+                    pr-2
                     scroll-smooth
                     snap-x
                     snap-mandatory
+                    sm:gap-5
 
                     [&::-webkit-scrollbar]:h-2
                     [&::-webkit-scrollbar-track]:bg-slate-100
@@ -1042,12 +1045,12 @@ const LandingPage = () => {
                 >
 
                     {/* ================= IPA ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[450px] bg-white border border-b-4 border-blue-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] sm:min-h-[450px] bg-white border border-b-4 border-blue-300 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
                     <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-[28px] mb-5">
                         🔬
                     </div>
 
-                    <h3 className="text-[24px] font-bold text-slate-700">
+                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                         IPA
                     </h3>
 
@@ -1089,12 +1092,12 @@ const LandingPage = () => {
 
 
                     {/* ================= IPS ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-orange-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-orange-300 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
                     <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-[28px] mb-5">
                         🌍
                     </div>
 
-                    <h3 className="text-[24px] font-bold text-slate-700">
+                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                         IPS
                     </h3>
 
@@ -1134,12 +1137,12 @@ const LandingPage = () => {
 
 
                     {/* ================= BAHASA ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-purple-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-purple-300 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
                     <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-[28px] mb-5">
                         📚
                     </div>
 
-                    <h3 className="text-[24px] font-bold text-slate-700">
+                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                         Bahasa
                     </h3>
 
@@ -1179,12 +1182,12 @@ const LandingPage = () => {
 
 
                     {/* ================= TKJ ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-cyan-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-cyan-300 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
                     <div className="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center text-[28px] mb-5">
                         💻
                     </div>
 
-                    <h3 className="text-[24px] font-bold text-slate-700">
+                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                         TKJ
                     </h3>
 
@@ -1224,12 +1227,12 @@ const LandingPage = () => {
 
 
                     {/* ================= AKL ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-emerald-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-emerald-300 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
                     <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-[28px] mb-5">
                         💰
                     </div>
 
-                    <h3 className="text-[24px] font-bold text-slate-700">
+                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                         AKL
                     </h3>
 
@@ -1269,12 +1272,12 @@ const LandingPage = () => {
 
 
                     {/* ================= TKRO ================= */}
-                    <div className="min-w-[320px] max-w-[320px] min-h-[430px] bg-white border border-b-4 border-red-300 rounded-[28px] p-6 shadow-sm snap-start flex flex-col">
+                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-red-300 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
                     <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-[28px] mb-5">
                         🚗
                     </div>
 
-                    <h3 className="text-[24px] font-bold text-slate-700">
+                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                         TKRO
                     </h3>
 
@@ -1319,15 +1322,15 @@ const LandingPage = () => {
       
       
       {/* ===== MAIN CONTENT ===== */}
-      <div className="flex-1 flex items-center justify-center p-4 relative z-10 mb-[100px]">
-        <div className="w-full lg:w-[70%]">
-          <div className="relative h-[500px] bg-white rounded-3xl shadow-xl border-1 border-blue-300 flex flex-row justify-between pt-10">
+      <div className="relative z-10 mb-16 flex items-center justify-center px-4 py-4 sm:px-6 lg:mb-24 lg:px-8">
+        <div className="w-full max-w-6xl">
+          <div className="relative flex min-h-[500px] flex-col-reverse gap-8 rounded-3xl border border-blue-200 bg-white p-4 shadow-xl sm:p-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10 lg:p-10">
                 
                 {/* RIWAYAT */}
-                <div className='flex flex-col w-[60%] p-5 ml-10'>
-                    <div className='w-full h-[350px] overflow-y-auto mt-3 flex flex-col gap-3'>
+                <div className='flex w-full min-w-0 flex-col lg:w-[62%]'>
+                    <div className='mt-1 flex max-h-[520px] w-full flex-col gap-3 overflow-y-auto pr-1 sm:pr-2'>
                         {hasilTestSiswa.map((hasil: any, index: number) => (
-                            <div key={hasil.id || index} className="rounded-2xl border border-blue-300 bg-white p-3 shadow-sm md:rounded-[1.7rem] md:p-5">
+                            <div key={hasil.id || index} className="rounded-2xl border border-blue-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:p-4 md:rounded-[1.7rem] md:p-5">
                                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
                                 <div className="flex items-start gap-3 md:gap-4">
                                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-extrabold text-white md:h-10 md:w-10 md:text-sm">
@@ -1340,7 +1343,7 @@ const LandingPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-2 md:min-w-[300px]">
+                                <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-2 md:w-auto md:min-w-[300px]">
                                     <div className="rounded-xl border border-blue-100 bg-blue-50 p-2 md:rounded-2xl md:p-3">
                                     <p className="text-[9px] font-bold text-blue-500 md:text-[10px]">Akademik</p>
                                     <p className="mt-1 truncate text-[11px] font-bold text-blue-800 md:text-sm">{hasil.rekomendasi_akademik || '-'}</p>
@@ -1357,8 +1360,8 @@ const LandingPage = () => {
                                 </div>
                                 {isDetailTes === hasil.id && (
 
-                                <div className="flex flex-col gap-3 h-[230px] mt-5 md:flex-row md:items-start md:justify-between items-start md:gap-4">
-                                    <div className='p-4 h-full flex flex-col border-[.5px] border-blue-400 bg-blue-50 rounded-lg flex-1'>
+                                <div className="mt-4 flex h-auto flex-col items-stretch gap-3 md:flex-row md:items-stretch md:justify-between md:gap-4">
+                                    <div className='flex min-w-0 flex-1 flex-col rounded-2xl border border-blue-200 bg-blue-50 p-4'>
                                     <p className='mb-2 font-bold text-blue-500'>Akademik</p>
                                     <div className='flex flex-col gap-2'>
                                         <div className='w-full flex flex-row justify-between'>
@@ -1379,7 +1382,7 @@ const LandingPage = () => {
                                         </div>
                                     </div>
                                     </div>
-                                    <div className='p-4 h-full flex flex-col border-[.5px] border-purple-400 bg-purple-50 rounded-lg flex-1'>
+                                    <div className='flex min-w-0 flex-1 flex-col rounded-2xl border border-purple-200 bg-purple-50 p-4'>
                                     <p className='mb-2 font-bold text-purple-500'>Minat (RIASEC)</p>
                                     <div className='flex flex-col gap-2'>
                                         <div className='w-full flex flex-row justify-between'>
@@ -1408,7 +1411,7 @@ const LandingPage = () => {
                                         </div>
                                     </div>
                                     </div>
-                                    <div className='p-4 h-full flex flex-col border-[.5px] border-emerald-400 bg-emerald-50 rounded-lg flex-1'>
+                                    <div className='flex min-w-0 flex-1 flex-col rounded-2xl border border-emerald-200 bg-emerald-50 p-4'>
                                     <p className='mb-2 font-bold text-emerald-500'>Bakat</p>
                                     <div className='flex flex-col gap-2'>
                                         <div className='w-full flex flex-row justify-between'>
@@ -1428,10 +1431,10 @@ const LandingPage = () => {
                                 </div>
                                 )}
 
-                                <div className="mt-3 flex gap-2 justify-end border-t border-slate-100 pt-3 md:mt-4 md:pt-4">
+                                <div className="mt-3 flex justify-stretch gap-2 border-t border-slate-100 pt-3 sm:justify-end md:mt-4 md:pt-4">
                                 <button
                                 onClick={() => handleDownloadPdf(hasil)}
-                                className="rounded-xl bg-gradient-to-br from-red-500 to-[#c70462] px-4 py-2 text-xs font-extrabold text-white shadow-lg transition hover:scale-105 md:px-6 md:text-sm"
+                                className="w-full rounded-xl bg-gradient-to-br from-red-500 to-[#c70462] px-4 py-2.5 text-xs font-extrabold text-white shadow-lg transition hover:scale-[1.02] sm:w-auto md:px-6 md:text-sm"
                                 >
                                 Download PDF
                                 </button>
@@ -1442,16 +1445,16 @@ const LandingPage = () => {
                 </div>
                 
                 {/* ===== BAGIAN KANAN ===== */}
-                <div className="flex flex-col pt-4 mr-[80px]">
-                    <p className=" text-blue-600 mb-3 w-[200px] text-center rounded-full bg-blue-100 border-[.5px] border-blue-500 px-6 py-2">
+                <div className="flex w-full flex-col items-center text-center lg:w-[32%] lg:items-start lg:pt-4 lg:text-left">
+                    <p className="mb-3 w-fit rounded-full border border-blue-300 bg-blue-100 px-5 py-2 text-center text-sm font-semibold text-blue-600 sm:px-6">
                     Riwayat Tes
                     </p>
 
-                    <h2 className="text-[30px] max-w-[320px] font-bold text-slate-700 leading-[1.15] mb-5">
+                    <h2 className="mb-4 max-w-md text-[26px] font-bold leading-[1.15] text-slate-700 sm:text-[30px] lg:mb-5 lg:max-w-[320px]">
                         Cek Kembali Hasil Tesmu
                     </h2>
 
-                    <p className="text-[15px] text-slate-500 leading-relaxed max-w-[320px]">
+                    <p className="max-w-md text-sm leading-relaxed text-slate-500 sm:text-[15px] lg:max-w-[320px]">
                         Lihat kembali hasil tes dan rekomendasi jurusan yang pernah kamu dapatkan.
                         Kamu juga bisa mengunduh hasilnya dalam bentuk PDF agar mudah disimpan.
                     </p>
@@ -1464,9 +1467,9 @@ const LandingPage = () => {
 
       {/* ===== MODAL PROFILE ===== */}
       {showProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowProfile(false)}></div>
-          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-6 z-50">
+          <div className="relative z-50 max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[1.75rem] bg-white p-5 shadow-2xl sm:rounded-[2rem] sm:p-6">
             <button
               onClick={() => setShowProfile(false)}
               className="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
@@ -1506,7 +1509,7 @@ const LandingPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Email</p>
-                  <p className="text-sm font-medium text-slate-700">{me.email}</p>
+                  <p className="break-all text-sm font-medium text-slate-700">{me.email}</p>
                 </div>
               </div>
 
@@ -1535,9 +1538,9 @@ const LandingPage = () => {
 
       {/* ===== MODAL LOGOUT ===== */}
       {showLogout && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowLogout(false)}></div>
-          <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-6 z-50 text-center">
+          <div className="relative z-50 w-full max-w-sm rounded-[1.75rem] bg-white p-5 text-center shadow-2xl sm:rounded-[2rem] sm:p-6">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -1549,7 +1552,7 @@ const LandingPage = () => {
               Apakah kamu yakin ingin keluar dari halaman tes? Jawaban yang sudah diisi akan tetap tersimpan sebagai draft.
             </p>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={() => setShowLogout(false)}
                 className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 rounded-2xl font-semibold text-sm hover:bg-slate-200 transition-all duration-200"

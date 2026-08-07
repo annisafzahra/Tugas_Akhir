@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dataHasilTest from '@/lib/function/dataHasilTest';
 import dataUserFunction from '@/lib/function/dataUserFunction';
 import { removeToken } from '@/lib/function/token';
-import { deleteHasilTes, deleteSiswa, getMe, updateSiswa } from '@/lib/function/api';
+import { CreateUserBulk, deleteHasilTes, deleteSiswa, getMe, updateSiswa } from '@/lib/function/api';
 import { CreateUser } from '@/lib/function/userFunction';
 import { UserType } from '@/type/dataHasilTestType';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx-js-style';
 
 type FormMode = 'tambah' | 'edit';
 type StatusType = 'success' | 'error';
@@ -107,6 +110,8 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
     email: '',
     is_staff: true,
   });
+
+  const importFileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -331,7 +336,7 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
         password: formData.password,
       });
 
-      if (!res || res.success === false) {
+      if (!res || res.data?.success === false) {
         showStatusPopup(
           'error',
           'Tambah Siswa Gagal',
@@ -543,6 +548,1432 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
         : 'border-slate-200 bg-slate-50 focus:border-blue-200 focus:bg-white focus:ring-blue-100'
     }`;
 
+    const handleDownloadPdf = async (hasil: any) => {
+      const akademik = hasil.rekomendasi_akademik || '-';
+      const riasec = hasil.rekomendasi_riasec || '-';
+      const bakat = hasil.rekomendasi_bakat || '-';
+    
+      // =====================================================
+      // DESKRIPSI JURUSAN
+      // Sama seperti yang ada di HasilPage
+      // =====================================================
+      const deskripsiJurusan: Record<string, string> = {
+        IPA:
+          'Jurusan ini sesuai bagi siswa yang menyukai sains, logika, dan pemecahan masalah secara sistematis.',
+    
+        IPS:
+          'Jurusan ini sesuai bagi siswa yang tertarik mempelajari ekonomi, masyarakat, dan berbagai fenomena sosial.',
+    
+        Bahasa:
+          'Jurusan ini sesuai bagi siswa yang menyukai komunikasi, literasi, serta pembelajaran bahasa dan budaya.',
+    
+        AKL:
+          'Jurusan ini sesuai bagi siswa yang teliti dan tertarik pada bidang keuangan, administrasi, serta pengelolaan data.',
+    
+        TKJ:
+          'Jurusan ini sesuai bagi siswa yang tertarik pada komputer, teknologi informasi, dan jaringan.',
+    
+        TKRO:
+          'Jurusan ini sesuai bagi siswa yang menyukai dunia otomotif, mesin, dan teknologi kendaraan.',
+      };
+    
+    
+      // =====================================================
+      // DESKRIPSI PER HASIL
+      // =====================================================
+      const getDeskripsi = (
+        jurusan: string,
+        sumber: 'akademik' | 'minat' | 'bakat'
+      ) => {
+        const deskripsi = deskripsiJurusan[jurusan] || '';
+    
+        if (sumber === 'akademik') {
+          return `Berdasarkan hasil tes akademik, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}. ${deskripsi}`;
+        }
+    
+        if (sumber === 'minat') {
+          return `Berdasarkan hasil tes minat RIASEC, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}. ${deskripsi}`;
+        }
+    
+        return `Berdasarkan hasil tes bakat, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}. ${deskripsi}`;
+      };
+    
+    
+      // =====================================================
+      // LOGIKA REKOMENDASI UTAMA
+      // mengikuti HasilPage
+      // =====================================================
+      const semuaSama =
+        akademik === riasec &&
+        riasec === bakat;
+    
+      const duaSama =
+        !semuaSama &&
+        (
+          akademik === riasec ||
+          akademik === bakat ||
+          riasec === bakat
+        );
+    
+    
+      let rekomendasiUtama = '';
+    
+      if (semuaSama) {
+        rekomendasiUtama = akademik;
+      }
+    
+      else if (duaSama) {
+        if (akademik === riasec) {
+          rekomendasiUtama = akademik;
+        }
+    
+        else if (akademik === bakat) {
+          rekomendasiUtama = akademik;
+        }
+    
+        else {
+          rekomendasiUtama = riasec;
+        }
+      }
+    
+      else {
+        rekomendasiUtama = akademik;
+      }
+    
+    
+      // =====================================================
+      // PENJELASAN REKOMENDASI UTAMA
+      // =====================================================
+      let penjelasanUtama = '';
+    
+      if (semuaSama) {
+        penjelasanUtama =
+          `Ketiga aspek (akademik, minat, dan bakat) menunjukkan hasil yang sama, yaitu ${rekomendasiUtama}. ` +
+          `Ini menandakan keselarasan yang kuat antara kemampuan, minat, dan bakat kamu.`;
+      }
+    
+      else if (duaSama) {
+        if (akademik === riasec) {
+          penjelasanUtama =
+            `Hasil akademik dan minat menunjukkan jurusan yang sama yaitu ${rekomendasiUtama}, sehingga menjadi rekomendasi utama.`;
+        }
+    
+        else if (akademik === bakat) {
+          penjelasanUtama =
+            `Hasil akademik dan bakat menunjukkan jurusan yang sama yaitu ${rekomendasiUtama}, sehingga menjadi rekomendasi utama.`;
+        }
+    
+        else {
+          penjelasanUtama =
+            `Hasil minat dan bakat menunjukkan jurusan yang sama yaitu ${rekomendasiUtama}, sehingga menjadi rekomendasi utama.`;
+        }
+      }
+    
+      else {
+        penjelasanUtama =
+          `Ketiga aspek (akademik, minat, dan bakat) menunjukkan hasil yang berbeda. ` +
+          `Rekomendasi utama diambil dari aspek akademik (${rekomendasiUtama}) karena nilai akademik merupakan data riil dari rapor yang mencerminkan kemampuan aktual siswa di sekolah.`;
+      }
+    
+    
+      // =====================================================
+      // DATA SISWA
+      // =====================================================
+      const nama =
+        hasil.user?.nama_lengkap ||
+        me.nama_lengkap ||
+        '-';
+    
+      const kelas =
+        hasil.user?.kelas ||
+        me.kelas ||
+        '-';
+    
+    
+      // =====================================================
+      // FORMAT TANGGAL
+      // contoh: 06-08-2026
+      // =====================================================
+      const tanggal = hasil.created_at
+        ? new Date(hasil.created_at)
+            .toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
+            .replace(/\//g, '-')
+        : '-';
+    
+    
+      // =====================================================
+      // BUAT HTML PDF
+      // =====================================================
+      const pdfElement = document.createElement('div');
+    
+      pdfElement.style.position = 'fixed';
+      pdfElement.style.left = '-99999px';
+      pdfElement.style.top = '0';
+    
+      /*
+        Ukuran sekitar A4 pada 96dpi.
+        Hasil akhirnya akan dimasukkan ke A4 jsPDF.
+      */
+      pdfElement.style.width = '794px';
+      pdfElement.style.minHeight = '1123px';
+    
+      pdfElement.style.background = '#ffffff';
+    
+      // kalau project kamu sudah pakai Poppins,
+      // html2canvas akan menangkap font ini.
+      pdfElement.style.fontFamily = 'Poppins, Arial, sans-serif';
+    
+      pdfElement.style.color = '#111111';
+    
+      pdfElement.innerHTML = `
+        <div
+          style="
+            width: 100%;
+            box-sizing: border-box;
+            padding: 66px 42px 50px 42px;
+            background: white;
+          "
+        >
+    
+          <!-- ============================= -->
+          <!-- HEADER -->
+          <!-- ============================= -->
+    
+          <div style="text-align:center;">
+            <h1
+              style="
+                margin:0;
+                color:#315f96;
+                font-size:22px;
+                font-weight:700;
+                line-height:1.2;
+              "
+            >
+              HASIL REKOMENDASI JURUSAN
+            </h1>
+    
+            <p
+              style="
+                margin:7px 0 0 0;
+                color:#64748b;
+                font-size:13px;
+                font-weight:400;
+              "
+            >
+              Berikut adalah rekomendasi jurusan berdasarkan data yang telah diisi
+            </p>
+          </div>
+    
+    
+          <!-- ============================= -->
+          <!-- IDENTITAS -->
+          <!-- ============================= -->
+    
+          <div
+            style="
+              margin-top:22px;
+              margin-left:10px;
+              font-size:13px;
+              line-height:1.65;
+            "
+          >
+    
+            <div style="display:flex;">
+              <div
+                style="
+                  width:70px;
+                  font-weight:700;
+                "
+              >
+                Nama
+              </div>
+    
+              <div style="width:12px;">
+                :
+              </div>
+    
+              <div>
+                ${nama}
+              </div>
+            </div>
+    
+    
+            <div style="display:flex;">
+              <div
+                style="
+                  width:70px;
+                  font-weight:700;
+                "
+              >
+                Kelas
+              </div>
+    
+              <div style="width:12px;">
+                :
+              </div>
+    
+              <div>
+                ${kelas}
+              </div>
+            </div>
+    
+    
+            <div style="display:flex;">
+              <div
+                style="
+                  width:70px;
+                  font-weight:700;
+                "
+              >
+                tanggal
+              </div>
+    
+              <div style="width:12px;">
+                :
+              </div>
+    
+              <div>
+                ${tanggal}
+              </div>
+            </div>
+    
+          </div>
+    
+    
+          <!-- ============================= -->
+          <!-- AKADEMIK -->
+          <!-- ============================= -->
+    
+          <div
+            style="
+              margin-top:34px;
+              border:1px solid #222222;
+            "
+          >
+    
+            <div
+                style="
+                    height:75px;
+                    box-sizing:border-box;
+                    padding:0px 12px;
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                "
+            >
+    
+              <div
+                style="
+                  font-size:11px;
+                  font-weight:700;
+                "
+              >
+                BERDASARKAN AKADEMIK
+              </div>
+    
+              <div
+                  style="
+                      color:#2563eb;
+                      font-size:17px;
+                      font-weight:700;
+                      margin-bottom:8px;
+                      line-height:1.2;
+                  "
+              >
+                  ${akademik}
+              </div>
+    
+            </div>
+    
+    
+            <div
+              style="
+                border-top:1px solid #222222;
+                padding:0px 12px;
+                padding-bottom: 18px;
+                font-size:12.5px;
+                line-height:1.55;
+              "
+            >
+              ${getDeskripsi(
+                akademik,
+                'akademik'
+              )}
+            </div>
+    
+          </div>
+    
+    
+          <!-- ============================= -->
+          <!-- MINAT RIASEC -->
+          <!-- ============================= -->
+    
+          <div
+            style="
+              margin-top:28px;
+              border:1px solid #222222;
+            "
+          >
+    
+              <div
+                  style="
+                      height:75px;
+                      box-sizing:border-box;
+                      padding:0px 12px;
+                      display:flex;
+                      flex-direction:column;
+                      justify-content:center;
+                  "
+              >
+    
+              <div
+                style="
+                  font-size:11px;
+                  font-weight:700;
+                "
+              >
+                BERDASARKAN MINAT (RIASEC)
+              </div>
+    
+              <div
+                  style="
+                      color:#2563eb;
+                      font-size:17px;
+                      font-weight:700;
+                      margin-bottom:8px;
+                      line-height:1.2;
+                  "
+              >
+                ${riasec}
+              </div>
+    
+            </div>
+    
+    
+            <div
+              style="
+                border-top:1px solid #222222;
+                padding:0px 12px;
+                padding-bottom: 18px;
+                font-size:12.5px;
+                line-height:1.55;
+              "
+            >
+              ${getDeskripsi(
+                riasec,
+                'minat'
+              )}
+            </div>
+    
+          </div>
+    
+    
+          <!-- ============================= -->
+          <!-- BAKAT -->
+          <!-- ============================= -->
+    
+          <div
+            style="
+              margin-top:28px;
+              border:1px solid #222222;
+            "
+          >
+    
+              <div
+                  style="
+                      height:75px;
+                      box-sizing:border-box;
+                      padding:0px 12px;
+                      display:flex;
+                      flex-direction:column;
+                      justify-content:center;
+                  "
+              >
+    
+              <div
+                style="
+                  font-size:11px;
+                  font-weight:700;
+                "
+              >
+                BERDASARKAN BAKAT
+              </div>
+    
+              <div
+                  style="
+                      color:#2563eb;
+                      font-size:17px;
+                      font-weight:700;
+                      margin-bottom:8px;
+                      line-height:1.2;
+                  "
+              >
+                ${bakat}
+              </div>
+    
+            </div>
+    
+    
+            <div
+              style="
+                border-top:1px solid #222222;
+                padding:0px 12px;
+                padding-bottom: 18px;
+                font-size:12.5px;
+                line-height:1.55;
+              "
+            >
+              ${getDeskripsi(
+                bakat,
+                'bakat'
+              )}
+            </div>
+    
+          </div>
+    
+    
+          <!-- ============================= -->
+          <!-- REKOMENDASI UTAMA -->
+          <!-- ============================= -->
+    
+          <div
+            style="
+              margin-top:29px;
+            "
+          >
+    
+            <!-- HEADER BIRU -->
+            <div
+              style="
+                background:#568bc6;
+                height:35px;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                color:white;
+                font-size:14px;
+                font-weight:400;
+                padding-top:0px;
+                padding-bottom:15px;
+              "
+            >
+              REKOMENDASI UTAMA
+            </div>
+    
+    
+            <!-- HASIL BIRU MUDA -->
+            <div
+              style="
+                height:52px;
+                background:#dbe8f5;
+                border-left:1px solid #8db4dc;
+                border-right:1px solid #8db4dc;
+                border-bottom:1px solid #8db4dc;
+    
+                display:flex;
+                align-items:center;
+                justify-content:center;
+    
+                color:#0875bd;
+                font-size:22px;
+                font-weight:700;
+  
+                padding-top:0px;
+                padding-bottom:20px;
+              "
+            >
+              ${rekomendasiUtama}
+            </div>
+    
+          </div>
+    
+    
+          <!-- ============================= -->
+          <!-- PENJELASAN UTAMA -->
+          <!-- ============================= -->
+    
+          <p
+            style="
+              margin:
+                17px
+                7px
+                0
+                7px;
+    
+              font-size:12.5px;
+              line-height:1.55;
+              color:#111111;
+            "
+          >
+            ${penjelasanUtama}
+          </p>
+    
+        </div>
+      `;
+    
+    
+      // masukkan sementara ke body
+      document.body.appendChild(pdfElement);
+    
+    
+      try {
+        // =====================================================
+        // HTML -> CANVAS
+        // =====================================================
+    
+        const canvas = await html2canvas(
+          pdfElement,
+          {
+            scale: 2.5,
+    
+            backgroundColor:
+              '#ffffff',
+    
+            useCORS: true,
+    
+            logging: false,
+    
+            windowWidth: 794,
+          }
+        );
+    
+    
+        // =====================================================
+        // CANVAS -> PDF A4
+        // =====================================================
+    
+        const imgData =
+          canvas.toDataURL(
+            'image/png',
+            1
+          );
+    
+    
+        const pdf =
+          new jsPDF(
+            'p',
+            'mm',
+            'a4'
+          );
+    
+    
+        const pdfWidth =
+          pdf.internal.pageSize.getWidth();
+    
+        const pdfHeight =
+          pdf.internal.pageSize.getHeight();
+    
+    
+        /*
+          Isi canvas dipasang memenuhi A4.
+          Karena HTML tadi sudah mengikuti rasio A4,
+          layout tidak berubah.
+        */
+        pdf.addImage(
+          imgData,
+          'PNG',
+          0,
+          0,
+          pdfWidth,
+          pdfHeight,
+          undefined,
+          'FAST'
+        );
+    
+    
+        // =====================================================
+        // NAMA FILE
+        // =====================================================
+    
+        const namaFile =
+          nama
+            .trim()
+            .replace(/\s+/g, '_')
+            .replace(
+              /[^a-zA-Z0-9_-]/g,
+              ''
+            );
+    
+    
+        pdf.save(
+          `Hasil_Rekomendasi_${namaFile}.pdf`
+        );
+    
+      }
+    
+      catch (error) {
+        console.error(
+          'Gagal membuat PDF:',
+          error
+        );
+    
+        alert(
+          'Gagal membuat PDF'
+        );
+      }
+    
+      finally {
+        // hapus element sementara
+        document.body.removeChild(
+          pdfElement
+        );
+      }
+    };
+
+    const handleExportExcel = () => {
+      if (!hasilList || hasilList.length === 0) {
+        alert('Belum ada data hasil tes yang dapat diexport.');
+        return;
+      }
+    
+      // =====================================================
+      // 1. AMBIL TES PALING LAMA / PERTAMA SETIAP SISWA
+      // =====================================================
+      const hasilTerlamaPerSiswa = new Map<number, any>();
+    
+      hasilList.forEach((hasil) => {
+        const userId = hasil.user?.id;
+    
+        if (!userId) return;
+    
+        const existing = hasilTerlamaPerSiswa.get(userId);
+    
+        if (!existing) {
+          hasilTerlamaPerSiswa.set(userId, hasil);
+          return;
+        }
+    
+        const tanggalExisting = new Date(existing.created_at).getTime();
+        const tanggalBaru = new Date(hasil.created_at).getTime();
+    
+        // Ambil tes PALING AWAL
+        if (tanggalBaru < tanggalExisting) {
+          hasilTerlamaPerSiswa.set(userId, hasil);
+        }
+      });
+    
+      const hasilExport = Array.from(
+        hasilTerlamaPerSiswa.values()
+      );
+    
+      // Urutkan berdasarkan nama
+      hasilExport.sort((a, b) =>
+        (a.user?.nama_lengkap || '').localeCompare(
+          b.user?.nama_lengkap || ''
+        )
+      );
+    
+      // =====================================================
+      // 2. DATA UNTUK EXCEL
+      // =====================================================
+      const dataRows = hasilExport.map((hasil, index) => [
+        index + 1,
+    
+        hasil.created_at
+          ? new Date(hasil.created_at).toLocaleDateString('id-ID')
+          : '-',
+    
+        hasil.user?.nama_lengkap || '-',
+        hasil.user?.username || '-',
+        hasil.user?.kelas || '-',
+        hasil.user?.kelamin || '-',
+    
+        // Akademik
+        hasil.mtk ?? '-',
+        hasil.indo ?? '-',
+        hasil.ipa ?? '-',
+        hasil.ips ?? '-',
+    
+        // RIASEC
+        hasil.realistic ?? '-',
+        hasil.investigative ?? '-',
+        hasil.artistic ?? '-',
+        hasil.social ?? '-',
+        hasil.enterprising ?? '-',
+        hasil.conventional ?? '-',
+    
+        // Bakat
+        hasil.logika ?? '-',
+        hasil.verbal ?? '-',
+        hasil.mekanikal ?? '-',
+    
+        // Hasil
+        hasil.rekomendasi_akademik || '-',
+        hasil.rekomendasi_riasec || '-',
+        hasil.rekomendasi_bakat || '-',
+    
+        // Hasil Akhir
+        hasil.rekomendasi_gabungan || '-',
+      ]);
+    
+      // =====================================================
+      // 3. HEADER SEGMENT
+      // =====================================================
+      const headerSegment = [
+        'DATA DIRI',
+        '',
+        '',
+        '',
+        '',
+        '',
+    
+        'AKADEMIK',
+        '',
+        '',
+        '',
+    
+        'RIASEC',
+        '',
+        '',
+        '',
+        '',
+        '',
+    
+        'BAKAT',
+        '',
+        '',
+    
+        'HASIL TES',
+        '',
+        '',
+    
+        'HASIL AKHIR',
+      ];
+    
+      const headerKolom = [
+        'No',
+        'Tanggal Tes',
+        'Nama Lengkap',
+        'Username',
+        'Kelas',
+        'Jenis Kelamin',
+    
+        'MTK',
+        'B. Indonesia',
+        'IPA',
+        'IPS',
+    
+        'Realistic',
+        'Investigative',
+        'Artistic',
+        'Social',
+        'Enterprising',
+        'Conventional',
+    
+        'Logika',
+        'Verbal',
+        'Mekanikal',
+    
+        'Akademik',
+        'RIASEC',
+        'Bakat',
+    
+        'Rekomendasi Akhir',
+      ];
+    
+      // =====================================================
+      // 4. BUAT WORKSHEET
+      // =====================================================
+      const worksheet = XLSX.utils.aoa_to_sheet([
+        headerSegment,
+        headerKolom,
+        ...dataRows,
+      ]);
+    
+      // =====================================================
+      // 5. MERGE HEADER SEGMENT
+      // =====================================================
+      worksheet['!merges'] = [
+        // Data diri A-F
+        XLSX.utils.decode_range('A1:F1'),
+    
+        // Akademik G-J
+        XLSX.utils.decode_range('G1:J1'),
+    
+        // RIASEC K-P
+        XLSX.utils.decode_range('K1:P1'),
+    
+        // Bakat Q-S
+        XLSX.utils.decode_range('Q1:S1'),
+    
+        // Hasil Tes T-V
+        XLSX.utils.decode_range('T1:V1'),
+    
+        // Hasil Akhir W
+        XLSX.utils.decode_range('W1:W2'),
+      ];
+    
+      // Karena W1:W2 digabung,
+      // hapus isi W2 supaya tidak double
+      worksheet['W2'] = undefined;
+    
+      // =====================================================
+      // 6. WARNA
+      // =====================================================
+      const colors = {
+        dataDiri: '4472C4',
+        akademik: '06B6D4',
+        riasec: '8B5CF6',
+        bakat: '22C55E',
+        hasil: 'F59E0B',
+        hasilAkhir: 'EF4444',
+    
+        dataDiriLight: 'DCE6F1',
+        akademikLight: 'CFFAFE',
+        riasecLight: 'EDE9FE',
+        bakatLight: 'DCFCE7',
+        hasilLight: 'FEF3C7',
+        hasilAkhirLight: 'FEE2E2',
+      };
+    
+      // =====================================================
+      // 7. STYLE HEADER SEGMENT
+      // =====================================================
+      const setHeaderStyle = (
+        range: string,
+        bgColor: string
+      ) => {
+        const decoded = XLSX.utils.decode_range(range);
+    
+        for (
+          let row = decoded.s.r;
+          row <= decoded.e.r;
+          row++
+        ) {
+          for (
+            let col = decoded.s.c;
+            col <= decoded.e.c;
+            col++
+          ) {
+            const address =
+              XLSX.utils.encode_cell({
+                r: row,
+                c: col,
+              });
+    
+            if (!worksheet[address]) {
+              worksheet[address] = {
+                t: 's',
+                v: '',
+              };
+            }
+    
+            worksheet[address].s = {
+              fill: {
+                fgColor: {
+                  rgb: bgColor,
+                },
+              },
+    
+              font: {
+                bold: true,
+                color: {
+                  rgb: 'FFFFFF',
+                },
+                sz: 12,
+              },
+    
+              alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+              },
+    
+              border: {
+                top: {
+                  style: 'thin',
+                  color: {
+                    rgb: 'FFFFFF',
+                  },
+                },
+                bottom: {
+                  style: 'thin',
+                  color: {
+                    rgb: 'FFFFFF',
+                  },
+                },
+                left: {
+                  style: 'thin',
+                  color: {
+                    rgb: 'FFFFFF',
+                  },
+                },
+                right: {
+                  style: 'thin',
+                  color: {
+                    rgb: 'FFFFFF',
+                  },
+                },
+              },
+            };
+          }
+        }
+      };
+    
+      setHeaderStyle('A1:F1', colors.dataDiri);
+      setHeaderStyle('G1:J1', colors.akademik);
+      setHeaderStyle('K1:P1', colors.riasec);
+      setHeaderStyle('Q1:S1', colors.bakat);
+      setHeaderStyle('T1:V1', colors.hasil);
+      setHeaderStyle('W1:W2', colors.hasilAkhir);
+    
+      // =====================================================
+      // 8. STYLE HEADER KOLOM BARIS 2
+      // =====================================================
+      const styleSubHeader = (
+        startCol: number,
+        endCol: number,
+        color: string
+      ) => {
+        for (
+          let col = startCol;
+          col <= endCol;
+          col++
+        ) {
+          const address =
+            XLSX.utils.encode_cell({
+              r: 1,
+              c: col,
+            });
+    
+          if (!worksheet[address]) continue;
+    
+          worksheet[address].s = {
+            fill: {
+              fgColor: {
+                rgb: color,
+              },
+            },
+    
+            font: {
+              bold: true,
+              color: {
+                rgb: '1E293B',
+              },
+              sz: 10,
+            },
+    
+            alignment: {
+              horizontal: 'center',
+              vertical: 'center',
+              wrapText: true,
+            },
+    
+            border: {
+              top: {
+                style: 'thin',
+                color: {
+                  rgb: 'CBD5E1',
+                },
+              },
+              bottom: {
+                style: 'thin',
+                color: {
+                  rgb: 'CBD5E1',
+                },
+              },
+              left: {
+                style: 'thin',
+                color: {
+                  rgb: 'CBD5E1',
+                },
+              },
+              right: {
+                style: 'thin',
+                color: {
+                  rgb: 'CBD5E1',
+                },
+              },
+            },
+          };
+        }
+      };
+    
+      styleSubHeader(0, 5, colors.dataDiriLight);
+      styleSubHeader(6, 9, colors.akademikLight);
+      styleSubHeader(10, 15, colors.riasecLight);
+      styleSubHeader(16, 18, colors.bakatLight);
+      styleSubHeader(19, 21, colors.hasilLight);
+    
+      // =====================================================
+      // 9. STYLE ISI DATA
+      // =====================================================
+      for (
+        let row = 2;
+        row < dataRows.length + 2;
+        row++
+      ) {
+        for (
+          let col = 0;
+          col <= 22;
+          col++
+        ) {
+          const address =
+            XLSX.utils.encode_cell({
+              r: row,
+              c: col,
+            });
+    
+          if (!worksheet[address]) continue;
+    
+          let background = 'FFFFFF';
+    
+          if (col <= 5) {
+            background = 'F8FAFC';
+          }
+    
+          if (col >= 6 && col <= 9) {
+            background = 'ECFEFF';
+          }
+    
+          if (col >= 10 && col <= 15) {
+            background = 'F5F3FF';
+          }
+    
+          if (col >= 16 && col <= 18) {
+            background = 'F0FDF4';
+          }
+    
+          if (col >= 19 && col <= 21) {
+            background = 'FFFBEB';
+          }
+    
+          if (col === 22) {
+            background = 'FEF2F2';
+          }
+    
+          worksheet[address].s = {
+            fill: {
+              fgColor: {
+                rgb: background,
+              },
+            },
+    
+            font: {
+              color: {
+                rgb: col === 22
+                  ? 'B91C1C'
+                  : '334155',
+              },
+    
+              bold:
+                col >= 19,
+            },
+    
+            alignment: {
+              vertical: 'center',
+    
+              horizontal:
+                col === 2 ||
+                col === 3
+                  ? 'left'
+                  : 'center',
+    
+              wrapText: true,
+            },
+    
+            border: {
+              top: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+              bottom: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+              left: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+              right: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+            },
+          };
+        }
+      }
+    
+      // =====================================================
+      // 10. LEBAR KOLOM
+      // =====================================================
+      worksheet['!cols'] = [
+        { wch: 6 },   // No
+        { wch: 14 },  // Tanggal
+        { wch: 28 },  // Nama
+        { wch: 20 },  // Username
+        { wch: 10 },  // Kelas
+        { wch: 15 },  // JK
+    
+        { wch: 10 },  // MTK
+        { wch: 15 },  // Indo
+        { wch: 10 },  // IPA
+        { wch: 10 },  // IPS
+    
+        { wch: 14 },
+        { wch: 16 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 15 },
+        { wch: 15 },
+    
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 14 },
+    
+        { wch: 18 },
+        { wch: 18 },
+        { wch: 18 },
+    
+        { wch: 22 },
+      ];
+    
+      // =====================================================
+      // 11. TINGGI BARIS
+      // =====================================================
+      worksheet['!rows'] = [
+        { hpt: 26 },
+        { hpt: 34 },
+      ];
+    
+      // =====================================================
+      // 12. FREEZE HEADER
+      // =====================================================
+      worksheet['!freeze'] = {
+        xSplit: 0,
+        ySplit: 2,
+      };
+    
+      // =====================================================
+      // 13. AUTO FILTER
+      // =====================================================
+      worksheet['!autofilter'] = {
+        ref: `A2:W${dataRows.length + 2}`,
+      };
+    
+      // =====================================================
+      // 14. WORKBOOK
+      // =====================================================
+      const workbook =
+        XLSX.utils.book_new();
+    
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        'Hasil Tes Siswa'
+      );
+    
+      // =====================================================
+      // 15. DOWNLOAD
+      // =====================================================
+      XLSX.writeFile(
+        workbook,
+        'Hasil_Tes_Siswa.xlsx'
+      );
+    };
+
+    const handleImportExcel = async (
+      event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const file = event.target.files?.[0];
+    
+      if (!file) return;
+    
+      try {
+        setIsLoading(true);
+    
+        // =========================================
+        // BACA FILE
+        // =========================================
+        const buffer = await file.arrayBuffer();
+    
+        const workbook = XLSX.read(buffer, {
+          type: 'array',
+        });
+    
+        // Ambil sheet pertama
+        const sheetName = workbook.SheetNames[0];
+    
+        const worksheet =
+          workbook.Sheets[sheetName];
+    
+        // =========================================
+        // EXCEL -> JSON
+        // =========================================
+        const data = XLSX.utils.sheet_to_json<any>(
+          worksheet,
+          {
+            defval: '',
+          }
+        );
+    
+        if (data.length === 0) {
+          showStatusPopup(
+            'error',
+            'Import Gagal',
+            'File Excel tidak memiliki data siswa.'
+          );
+    
+          return;
+        }
+    
+        // =========================================
+        // CEK HEADER
+        // =========================================
+        const requiredColumns = [
+          'nama_lengkap',
+          'kelas',
+          'usia',
+          'kelamin',
+          'username',
+          'email',
+          'password',
+        ];
+    
+        const firstRow = data[0];
+    
+        const missingColumns =
+          requiredColumns.filter(
+            (column) =>
+              !(column in firstRow)
+          );
+    
+        if (missingColumns.length > 0) {
+          showStatusPopup(
+            'error',
+            'Format Excel Tidak Sesuai',
+            `Kolom berikut tidak ditemukan: ${missingColumns.join(', ')}`
+          );
+    
+          return;
+        }
+    
+        // =========================================
+        // FORMAT DATA
+        // =========================================
+        const siswaImport = data.map(
+          (row: any) => ({
+            nama_lengkap:
+              String(row.nama_lengkap || '').trim(),
+    
+            kelas:
+              String(row.kelas || '').trim(),
+    
+            usia:
+              Number(row.usia),
+    
+            kelamin:
+              String(row.kelamin || '')
+                .trim()
+                .toLowerCase(),
+    
+            username:
+              String(row.username || '').trim(),
+    
+            email:
+              String(row.email || '').trim(),
+    
+            password:
+              String(row.password || ''),
+          })
+        );
+    
+        // =========================================
+        // VALIDASI BARIS KOSONG
+        // =========================================
+        const dataValid = siswaImport.filter(
+          (siswa) =>
+            siswa.nama_lengkap &&
+            siswa.kelas &&
+            siswa.usia &&
+            siswa.kelamin &&
+            siswa.username &&
+            siswa.email &&
+            siswa.password
+        );
+    
+        if (dataValid.length === 0) {
+          showStatusPopup(
+            'error',
+            'Import Gagal',
+            'Tidak ditemukan data siswa yang valid.'
+          );
+    
+          return;
+        }
+    
+        // =========================================
+        // KIRIM KE DJANGO
+        // =========================================
+        const res =
+          await CreateUserBulk(dataValid);
+    
+        if (!res || res.data?.success === false) {
+          showStatusPopup(
+            'error',
+            'Import Siswa Gagal',
+            res.data?.message ||
+              'Data siswa gagal diimport.'
+          );
+    
+          return;
+        }
+    
+        // =========================================
+        // HASIL
+        // =========================================
+        const jumlahBerhasil =
+          res.data.berhasil?.length || 0;
+    
+        const jumlahGagal =
+          res.data.gagal?.length || 0;
+    
+        showStatusPopup(
+          jumlahBerhasil > 0
+            ? 'success'
+            : 'error',
+    
+          'Import Siswa Selesai',
+    
+          `${jumlahBerhasil} siswa berhasil ditambahkan, ${jumlahGagal} siswa gagal.`
+        );
+    
+        router.refresh();
+    
+      } catch (error) {
+        console.error(
+          'Import Excel gagal:',
+          error
+        );
+    
+        showStatusPopup(
+          'error',
+          'Import Excel Gagal',
+          'File Excel tidak dapat diproses. Pastikan format file sudah benar.'
+        );
+    
+      } finally {
+        setIsLoading(false);
+    
+        // Reset supaya file yang sama
+        // bisa dipilih lagi
+        if (importFileRef.current) {
+          importFileRef.current.value = '';
+        }
+      }
+    };
+
   return (
     <div className="relative min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-gradient-to-br from-sky-50 via-white to-indigo-100 px-3 py-3 sm:px-4 md:px-8 md:py-8">
       <div className="pointer-events-none absolute -top-24 -left-20 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl md:h-80 md:w-80" />
@@ -678,15 +2109,75 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 <p className="text-xs text-slate-500 md:text-sm">Cari, tambah, edit, hapus, dan lihat hasil rekomendasi siswa.</p>
               </div>
 
-              <button
-                onClick={handleOpenTambah}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl md:rounded-2xl md:px-5 md:py-3 md:text-sm"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Siswa
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <button
+                  onClick={handleExportExcel}
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    rounded-xl
+                    bg-emerald-500
+                    px-4 py-2.5
+                    text-xs font-semibold text-white
+                    shadow-lg shadow-emerald-100
+                    transition
+                    hover:-translate-y-0.5
+                    hover:bg-emerald-600
+                    md:rounded-2xl
+                    md:px-5 md:py-3
+                    md:text-sm
+                  "
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"
+                    />
+                  </svg>
+
+                  Export Excel
+                </button>
+
+                <button
+                  onClick={handleOpenTambah}
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    rounded-xl
+                    bg-gradient-to-r from-blue-500 to-indigo-600
+                    px-4 py-2.5
+                    text-xs font-semibold text-white
+                    shadow-lg shadow-blue-200
+                    transition
+                    hover:-translate-y-0.5
+                    hover:shadow-xl
+                    md:rounded-2xl
+                    md:px-5 md:py-3
+                    md:text-sm
+                  "
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+
+                  Tambah Siswa
+                </button>
+              </div>
             </div>
 
             <div className="relative">
@@ -982,6 +2473,12 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
 
                         <div className="mt-3 flex gap-2 justify-end border-t border-slate-100 pt-3 md:mt-4 md:pt-4">
                           <button
+                                onClick={() => handleDownloadPdf(hasil)}
+                                className="w-full rounded-xl bg-gradient-to-br from-red-500 to-[#c70462] px-4 py-2.5 text-xs font-extrabold text-white shadow-lg transition hover:scale-[1.02] sm:w-auto md:px-6 md:text-sm"
+                                >
+                                Download PDF
+                                </button>
+                          <button
                             onClick={() => {
                               if(isDetailTes===hasil.id){
                                 setIsDetailTes(0);
@@ -1230,6 +2727,13 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                   </div>
                 </>
               )}
+              <input
+                ref={importFileRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImportExcel}
+                className="hidden"
+              />
             </div>
 
             <div className="mt-5 flex flex-col-reverse gap-2 md:mt-6 md:flex-row md:gap-3">
@@ -1240,6 +2744,51 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 {isLoading ? 'Menyimpan...' : formMode === 'tambah' ? 'Tambah Siswa' : 'Simpan Perubahan'}
               </button>
             </div>
+            <button
+              onClick={() =>
+                importFileRef.current?.click()
+              }
+              disabled={isLoading}
+              className="
+                mt-3 w-full
+                inline-flex items-center
+                justify-center gap-2
+                rounded-xl
+                bg-emerald-500
+                px-4 py-2.5
+                text-xs font-semibold
+                text-white
+                shadow-lg
+                shadow-emerald-100
+                transition
+                hover:-translate-y-0.5
+                hover:bg-emerald-600
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+                md:rounded-2xl
+                md:px-5
+                md:py-3
+                md:text-sm
+              "
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 16V4m0 0L8 8m4-4 4 4M5 20h14"
+                />
+              </svg>
+
+              {isLoading
+                ? 'Mengimport...'
+                : 'Import Siswa'}
+            </button>
           </div>
         </div>
       )}

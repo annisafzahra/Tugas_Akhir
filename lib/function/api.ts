@@ -39,6 +39,7 @@ api.interceptors.request.use(
 // AUTH
 export const login = (data: loginType) => api.post("login/", data);
 export const register = (data: registerType) => api.post("user/create/", data);
+export const CreateUserBulk = (data: any) => api.post("user/register-bulk/", data);
 export const getUser = () => api.get("user/get/");
 export const getMe = (id: number) => api.get(`user/detail/${id}/`);
 
