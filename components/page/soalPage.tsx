@@ -29,6 +29,15 @@ const SoalPage = () => {
   const [jawabanRiasec, setJawabanRiasec] = useState<any[]>([]);
   const [jawabanBakat, setJawabanBakat] = useState<any[]>([]);
   const [akademik, setAkademik] = useState({
+    mtk: [0, 0, 0, 0, 0, 0],
+    indo: [0, 0, 0, 0, 0, 0],
+    ipa: [0, 0, 0, 0, 0, 0],
+    ips: [0, 0, 0, 0, 0, 0],
+  });
+
+  // Semester yang sedang ditampilkan pada masing-masing mata pelajaran.
+  // Nilai 0 = S1, 1 = S2, dst.
+  const [semesterAktif, setSemesterAktif] = useState({
     mtk: 0,
     indo: 0,
     ipa: 0,
@@ -71,6 +80,29 @@ const SoalPage = () => {
       nilai: 0,
     }));
 
+  const normalizeAkademikDraft = (savedAkademik: any) => {
+    const keys = ['mtk', 'indo', 'ipa', 'ips'] as const;
+
+    return keys.reduce(
+      (result, key) => {
+        const value = savedAkademik?.[key];
+
+        // Mendukung draft lama yang masih menyimpan satu angka per mapel.
+        result[key] = Array.isArray(value)
+          ? [...value.slice(0, 6), ...Array(Math.max(0, 6 - value.length)).fill(0)]
+          : [Number(value) || 0, 0, 0, 0, 0, 0];
+
+        return result;
+      },
+      {
+        mtk: [0, 0, 0, 0, 0, 0],
+        indo: [0, 0, 0, 0, 0, 0],
+        ipa: [0, 0, 0, 0, 0, 0],
+        ips: [0, 0, 0, 0, 0, 0],
+      } as Record<'mtk' | 'indo' | 'ipa' | 'ips', number[]>
+    );
+  };
+
   // ===== REFS UNTUK SCROLL =====
   const contentRef = useRef<HTMLDivElement>(null);
   const soalRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -87,12 +119,14 @@ const SoalPage = () => {
         setStep(draft.step || 1);
   
         setAkademik(
-          draft.akademik || {
-            mtk: 0,
-            indo: 0,
-            ipa: 0,
-            ips: 0,
-          }
+          normalizeAkademikDraft(
+            draft.akademik || {
+              mtk: [0, 0, 0, 0, 0, 0],
+              indo: [0, 0, 0, 0, 0, 0],
+              ipa: [0, 0, 0, 0, 0, 0],
+              ips: [0, 0, 0, 0, 0, 0],
+            }
+          )
         );
   
         setJawabanRiasec(
@@ -187,13 +221,32 @@ const SoalPage = () => {
     );
   };
 
-  const updateAkademik = (key: string, value: number) => {
+  const updateAkademik = (
+    key: keyof typeof akademik,
+    semesterIndex: number,
+    value: number
+  ) => {
     const clampedValue = Math.min(100, Math.max(0, value));
+
     setAkademik((prev) => ({
       ...prev,
-      [key]: clampedValue,
+      [key]: prev[key].map((nilai, index) =>
+        index === semesterIndex ? clampedValue : nilai
+      ),
     }));
   };
+
+  const rataRataAkademik = (key: keyof typeof akademik) => {
+    const nilaiSemester = akademik[key];
+    const total = nilaiSemester.reduce((sum, nilai) => sum + nilai, 0);
+    return Math.round(total / nilaiSemester.length);
+  };
+
+  const jumlahAkademikTerisi = Object.values(akademik).reduce(
+    (total, nilaiMapel) =>
+      total + nilaiMapel.filter((nilai) => Number(nilai) > 0).length,
+    0
+  );
 
   const hitungBakat = () => {
     const result: any = { logika: 0, verbal: 0, mekanikal: 0 };
@@ -207,7 +260,9 @@ const SoalPage = () => {
   };
 
   const isStep1Complete = () => {
-    return akademik.mtk > 0 && akademik.indo > 0 && akademik.ipa > 0 && akademik.ips > 0;
+    return Object.values(akademik).every((nilaiMapel) =>
+      nilaiMapel.every((nilai) => Number(nilai) > 0)
+    );
   };
 
   const isStep2Complete = () => {
@@ -226,15 +281,19 @@ const SoalPage = () => {
   ] as const;
 
   const answerTargets = [
-    ...akademikItems.map((item) => ({
-      step: 1,
-      group: 'Akademik',
-      label: item.label,
-      title: item.title,
-      refKey: `akademik-${item.key}`,
-      answered: Number(akademik[item.key]) > 0,
-      value: akademik[item.key],
-    })),
+    ...akademikItems.flatMap((item) =>
+      akademik[item.key].map((nilai, semesterIndex) => ({
+        step: 1,
+        group: 'Akademik',
+        label: `${item.label} S${semesterIndex + 1}`,
+        title: `${item.title} Semester ${semesterIndex + 1}`,
+        refKey: `akademik-${item.key}-${semesterIndex}`,
+        answered: Number(nilai) > 0,
+        value: nilai,
+        key: item.key,
+        semesterIndex,
+      }))
+    ),
     ...soalList.map((item, index) => {
       const jawaban = jawabanRiasec.find((j) => j.soal_id === item.id);
       return {
@@ -267,6 +326,18 @@ const SoalPage = () => {
 
   const goToAnswerTarget = (target: any) => {
     setShowAnswerCheck(false);
+
+    if (
+      target.step === 1 &&
+      target.key &&
+      typeof target.semesterIndex === 'number'
+    ) {
+      setSemesterAktif((prev) => ({
+        ...prev,
+        [target.key]: target.semesterIndex,
+      }));
+    }
+
     setStep(target.step);
 
     setTimeout(() => {
@@ -284,9 +355,13 @@ const SoalPage = () => {
   // ===== CARI SOAL PERTAMA YANG BELUM TERJAWAB =====
   const getFirstUnansweredIndex = (): number | null => {
     if (step === 1) {
-      const keys = ['mtk', 'indo', 'ipa', 'ips'];
-      for (let i = 0; i < keys.length; i++) {
-        if (akademik[keys[i] as keyof typeof akademik] === 0) return i;
+      for (let mapelIndex = 0; mapelIndex < akademikItems.length; mapelIndex++) {
+        const item = akademikItems[mapelIndex];
+        for (let semesterIndex = 0; semesterIndex < 6; semesterIndex++) {
+          if (Number(akademik[item.key][semesterIndex]) === 0) {
+            return mapelIndex * 6 + semesterIndex;
+          }
+        }
       }
       return null;
     }
@@ -316,8 +391,16 @@ const SoalPage = () => {
     let refKey = '';
 
     if (step === 1) {
-      const keys = ['mtk', 'indo', 'ipa', 'ips'];
-      refKey = `akademik-${keys[firstUnanswered]}`;
+      const mapelIndex = Math.floor(firstUnanswered / 6);
+      const semesterIndex = firstUnanswered % 6;
+      const item = akademikItems[mapelIndex];
+
+      setSemesterAktif((prev) => ({
+        ...prev,
+        [item.key]: semesterIndex,
+      }));
+
+      refKey = `akademik-${item.key}-${semesterIndex}`;
     } else if (step === 2) {
       refKey = `riasec-${soalList[firstUnanswered].id}`;
     } else if (step === 3) {
@@ -360,9 +443,18 @@ const SoalPage = () => {
 
   const handleSubmit = async () => {
     // Cek semua jawaban lengkap
-    if (!isStep3Complete()) {
+    if (!isStep1Complete() || !isStep2Complete() || !isStep3Complete()) {
       alert('Mohon lengkapi semua jawaban terlebih dahulu.');
-      scrollToUnanswered();
+
+      if (!isStep1Complete()) {
+        setStep(1);
+      } else if (!isStep2Complete()) {
+        setStep(2);
+      } else {
+        setStep(3);
+      }
+
+      setTimeout(() => scrollToUnanswered(), 150);
       return;
     }
 
@@ -379,10 +471,12 @@ const SoalPage = () => {
     });
 
     const dataUntukBackend = {
-      mtk: akademik.mtk,
-      indo: akademik.indo,
-      ipa: akademik.ipa,
-      ips: akademik.ips,
+      // Backend tetap menerima 1 nilai per mapel.
+      // Nilai yang dikirim adalah rata-rata dari Semester 1 s.d. Semester 6.
+      mtk: rataRataAkademik('mtk'),
+      indo: rataRataAkademik('indo'),
+      ipa: rataRataAkademik('ipa'),
+      ips: rataRataAkademik('ips'),
       realistic: dimensiScores.R,
       investigative: dimensiScores.I,
       artistic: dimensiScores.A,
@@ -438,11 +532,21 @@ const SoalPage = () => {
       <div className="relative z-20 px-4 pt-4 pb-2">
         <div className="flex items-center justify-between max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
+          <button onClick={()=>{router.push('/landing')}} className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200 transition-all duration-300 ease-in-out hover:scale-110">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.25 19.25L3.75 12l6.5-7.25M4.5 12h15"
+              />
+            </svg>
+          </button>
             <div>
               <h1 className="text-lg font-bold text-slate-800">Tes Penjurusan</h1>
               <p className="text-xs text-slate-500">Hai, {me.nama_lengkap.split(' ')[0]}</p>
@@ -536,24 +640,75 @@ const SoalPage = () => {
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 1 Akademik</p>
                     <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
-                      {akademikItems.filter((item) => Number(akademik[item.key]) > 0).length}/4
+                      {jumlahAkademikTerisi}/24
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {akademikItems.map((item) => {
-                      const answered = Number(akademik[item.key]) > 0;
+
+                  <div className="space-y-2">
+                    {[0, 1, 2, 3, 4, 5].map((semesterIndex) => {
+                      const semesterLengkap = akademikItems.every(
+                        (item) => Number(akademik[item.key][semesterIndex]) > 0
+                      );
+
                       return (
-                        <button
-                          key={item.key}
-                          onClick={() => goToAnswerTarget({ step: 1, refKey: `akademik-${item.key}` })}
-                          className={`flex h-11 items-center justify-center rounded-2xl border text-[11px] font-bold transition hover:-translate-y-0.5
-                            ${answered
-                              ? 'border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-100'
-                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
-                            }`}
+                        <div
+                          key={semesterIndex}
+                          className={`rounded-2xl border p-2 ${
+                            semesterLengkap
+                              ? 'border-emerald-200 bg-emerald-50/60'
+                              : 'border-red-100 bg-red-50/40'
+                          }`}
                         >
-                          {item.label}
-                        </button>
+                          <div className="mb-2 flex items-center justify-between">
+                            <span
+                              className={`text-[10px] font-bold ${
+                                semesterLengkap ? 'text-emerald-600' : 'text-red-500'
+                              }`}
+                            >
+                              Semester {semesterIndex + 1}
+                            </span>
+
+                            <span
+                              className={`text-[9px] font-semibold ${
+                                semesterLengkap ? 'text-emerald-600' : 'text-red-400'
+                              }`}
+                            >
+                              {semesterLengkap ? 'Lengkap' : 'Belum lengkap'}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {akademikItems.map((item) => {
+                              const answered =
+                                Number(akademik[item.key][semesterIndex]) > 0;
+
+                              return (
+                                <button
+                                  key={`${item.key}-${semesterIndex}`}
+                                  onClick={() => {
+                                    setSemesterAktif((prev) => ({
+                                      ...prev,
+                                      [item.key]: semesterIndex,
+                                    }));
+
+                                    goToAnswerTarget({
+                                      step: 1,
+                                      refKey: `akademik-${item.key}-${semesterIndex}`,
+                                    });
+                                  }}
+                                  className={`flex h-9 items-center justify-center rounded-xl border text-[10px] font-bold transition hover:-translate-y-0.5
+                                    ${
+                                      answered
+                                        ? 'border-emerald-500 bg-emerald-500 text-white shadow-sm shadow-emerald-100'
+                                        : 'border-red-200 bg-red-50 text-red-500 hover:bg-red-100'
+                                    }`}
+                                >
+                                  {item.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
@@ -661,78 +816,141 @@ const SoalPage = () => {
                       <div>
                         <h3 className="font-semibold text-slate-800 text-sm mb-1">Nilai Akademik</h3>
                         <p className="text-xs text-slate-600 leading-relaxed">
-                          Masukkan nilai rapor semester terakhir untuk setiap mata pelajaran (0-100). Geser slider atau ketik langsung nilainya.
+                          Masukkan nilai rapor Semester 1 sampai Semester 6 untuk setiap mata pelajaran (0-100). Pilih semester dengan tombol S1-S6, lalu geser slider atau ketik langsung nilainya.
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {dataAkademik.map((item) => {
-                    const nilai = akademik[item.key as keyof typeof akademik];
+                    const key = item.key as keyof typeof akademik;
+                    const semesterIndex = semesterAktif[key];
+                    const nilai = akademik[key][semesterIndex];
                     const info = getNilaiInfo(nilai);
+
                     return (
                       <div
                         key={item.key}
-                        ref={(el) => { soalRefs.current[`akademik-${item.key}`] = el; }}
                         className="bg-white border border-blue-50 rounded-2xl p-5 hover:shadow-md transition-all duration-300"
                       >
-                        <div className="flex items-center justify-between mb-4">
-                          <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                            <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xs font-bold">
-                              {item.label.charAt(0)}
-                            </span>
-                            {item.label}
-                          </p>
-                          {/* {nilai > 0 && (
-                            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${info.bg} ${info.color}`}>
-                              {info.label}
-                            </span>
-                          )} */}
-                        </div>
+                        <div className="flex flex-col gap-3 mb-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                              <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xs font-bold">
+                                {item.label.charAt(0)}
+                              </span>
+                              {item.label}
+                            </p>
 
-                        <div className="flex items-center gap-4">
-                          <div className="flex-1 relative">
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              value={nilai}
-                              onChange={(e) => updateAkademik(item.key, parseInt(e.target.value) || 0)}
-                              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500
-                                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 
-                                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 
-                                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
-                                [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
-                            />
-                            <div className="flex justify-between px-1 mt-1">
-                              <span className="text-[10px] text-slate-400">0</span>
-                              <span className="text-[10px] text-slate-400">25</span>
-                              <span className="text-[10px] text-slate-400">50</span>
-                              <span className="text-[10px] text-slate-400">75</span>
-                              <span className="text-[10px] text-slate-400">100</span>
-                            </div>
+                            {nilai > 0 && (
+                              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${info.bg} ${info.color}`}>
+                                {info.label}
+                              </span>
+                            )}
                           </div>
 
-                          <div className="relative">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={nilai || ''}
-                              onChange={(e) => {
-                                const val = e.target.value === '' ? 0 : parseInt(e.target.value);
-                                updateAkademik(item.key, val);
-                              }}
-                              onBlur={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                updateAkademik(item.key, val);
-                              }}
-                              placeholder="0"
-                              className="w-16 h-11 text-center text-sm font-semibold bg-blue-50 border border-blue-100 rounded-xl 
-                                focus:outline-none focus:ring-2 focus:ring-blue-300 focus:bg-white focus:border-blue-200 
-                                transition-all duration-300 text-slate-700 placeholder:text-slate-300
-                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            />
+                          {/* PILIH SEMESTER S1 - S6 */}
+                          <div className="grid grid-cols-6 gap-2">
+                            {[0, 1, 2, 3, 4, 5].map((sem) => {
+                              const nilaiSemester = akademik[key][sem];
+                              const sudahDiisi = Number(nilaiSemester) > 0;
+                              const sedangAktif = semesterIndex === sem;
+
+                              return (
+                                <button
+                                  key={sem}
+                                  type="button"
+                                  onClick={() =>
+                                    setSemesterAktif((prev) => ({
+                                      ...prev,
+                                      [key]: sem,
+                                    }))
+                                  }
+                                  className={`h-9 rounded-xl border text-[11px] font-bold transition-all duration-200
+                                    ${
+                                      sudahDiisi
+                                        ? 'border-blue-500 bg-blue-500 text-white'
+                                        : 'border-red-300 bg-red-50 text-red-500'
+                                    }
+                                    ${
+                                      sedangAktif
+                                        ? 'ring-2 ring-blue-400 ring-offset-2 scale-105'
+                                        : 'hover:scale-105'
+                                    }`}
+                                >
+                                  S{sem + 1}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <p className="text-[11px] text-slate-400">
+                            Sedang mengisi <span className="font-semibold text-blue-600">Semester {semesterIndex + 1}</span>
+                            {' '}• Hijau = sudah diisi, merah = belum diisi.
+                          </p>
+                        </div>
+
+                        <div
+                          ref={(el) => {
+                            soalRefs.current[`akademik-${item.key}-${semesterIndex}`] = el;
+                          }}
+                          className="rounded-xl"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1 relative">
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={nilai}
+                                onChange={(e) =>
+                                  updateAkademik(
+                                    key,
+                                    semesterIndex,
+                                    parseInt(e.target.value) || 0
+                                  )
+                                }
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500
+                                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                                  [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500
+                                  [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
+                                  [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform"
+                              />
+
+                              <div className="flex justify-between px-1 mt-1">
+                                <span className="text-[10px] text-slate-400">0</span>
+                                <span className="text-[10px] text-slate-400">25</span>
+                                <span className="text-[10px] text-slate-400">50</span>
+                                <span className="text-[10px] text-slate-400">75</span>
+                                <span className="text-[10px] text-slate-400">100</span>
+                              </div>
+                            </div>
+
+                            <div className="relative">
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={nilai || ''}
+                                onChange={(e) => {
+                                  const val =
+                                    e.target.value === ''
+                                      ? 0
+                                      : parseInt(e.target.value);
+
+                                  updateAkademik(key, semesterIndex, val);
+                                }}
+                                onBlur={(e) => {
+                                  const val = parseInt(e.target.value) || 0;
+                                  updateAkademik(key, semesterIndex, val);
+                                }}
+                                placeholder="0"
+                                className="w-16 h-11 text-center text-sm font-semibold bg-blue-50 border border-blue-100 rounded-xl
+                                  focus:outline-none focus:ring-2 focus:ring-blue-300 focus:bg-white focus:border-blue-200
+                                  transition-all duration-300 text-slate-700 placeholder:text-slate-300
+                                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -964,7 +1182,7 @@ const SoalPage = () => {
                     style={{ width: `${progressJawaban}%` }}
                   />
                 </div>
-                <p className={`mt-2 text-xs font-medium ${unansweredTargets.length === 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                <p className={`mt-2 text-xs font-medium ${unansweredTargets.length === 0 ? 'text-blue-600' : 'text-amber-600'}`}>
                   {unansweredTargets.length === 0
                     ? 'Semua jawaban sudah lengkap.'
                     : `${unansweredTargets.length} jawaban belum terisi.`}
@@ -976,24 +1194,75 @@ const SoalPage = () => {
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Step 1 Akademik</p>
                     <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600">
-                      {akademikItems.filter((item) => Number(akademik[item.key]) > 0).length}/4
+                      {jumlahAkademikTerisi}/24
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {akademikItems.map((item) => {
-                      const answered = Number(akademik[item.key]) > 0;
+
+                  <div className="space-y-2">
+                    {[0, 1, 2, 3, 4, 5].map((semesterIndex) => {
+                      const semesterLengkap = akademikItems.every(
+                        (item) => Number(akademik[item.key][semesterIndex]) > 0
+                      );
+
                       return (
-                        <button
-                          key={item.key}
-                          onClick={() => goToAnswerTarget({ step: 1, refKey: `akademik-${item.key}` })}
-                          className={`flex h-11 items-center justify-center rounded-2xl border text-[11px] font-bold transition hover:-translate-y-0.5
-                            ${answered
-                              ? 'border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-100'
-                              : 'border-slate-200 bg-slate-100 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500'
-                            }`}
+                        <div
+                          key={semesterIndex}
+                          className={`rounded-2xl border p-2 ${
+                            semesterLengkap
+                              ? 'border-blue-200 bg-blue-50/60'
+                              : 'border-red-100 bg-red-50/40'
+                          }`}
                         >
-                          {item.label}
-                        </button>
+                          <div className="mb-2 flex items-center justify-between">
+                            <span
+                              className={`text-[10px] font-bold ${
+                                semesterLengkap ? 'text-blue-600' : 'text-red-500'
+                              }`}
+                            >
+                              Semester {semesterIndex + 1}
+                            </span>
+
+                            <span
+                              className={`text-[9px] font-semibold ${
+                                semesterLengkap ? 'text-blue-600' : 'text-red-400'
+                              }`}
+                            >
+                              {semesterLengkap ? 'Lengkap' : 'Belum lengkap'}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {akademikItems.map((item) => {
+                              const answered =
+                                Number(akademik[item.key][semesterIndex]) > 0;
+
+                              return (
+                                <button
+                                  key={`${item.key}-${semesterIndex}`}
+                                  onClick={() => {
+                                    setSemesterAktif((prev) => ({
+                                      ...prev,
+                                      [item.key]: semesterIndex,
+                                    }));
+
+                                    goToAnswerTarget({
+                                      step: 1,
+                                      refKey: `akademik-${item.key}-${semesterIndex}`,
+                                    });
+                                  }}
+                                  className={`flex h-9 items-center justify-center rounded-xl border text-[10px] font-bold transition hover:-translate-y-0.5
+                                    ${
+                                      answered
+                                        ? 'border-blue-500 bg-blue-500 text-white shadow-sm shadow-emerald-100'
+                                        : 'border-red-200 bg-red-50 text-red-500 hover:bg-red-100'
+                                    }`}
+                                >
+                                  {item.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
                       );
                     })}
                   </div>

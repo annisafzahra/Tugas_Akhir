@@ -6,6 +6,7 @@ import { getToken } from "./token";
 // export const BASEURL = "http://127.0.0.1:8000/api/";
 // export const BASEURL = "https://tugasakhirbe-production.up.railway.app/api/";
 export const BASEURL = "https://myjurusanserver.my.id/api/";
+
 // export const BASEURL = process.env.NEXT_PUBLIC_API_URL + "/api/";
 
 export const api = axios.create({

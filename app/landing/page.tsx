@@ -270,7 +270,7 @@ const LandingPage = () => {
             <div className='w-[50%] flex flex-col gap-6 pt-[70px]'>
                 <p className='text-[40px] font-bold leading-[1.2]'>Bingung Memilih Jurusan? Kami Siap Membantu!</p>
                 <p className='w-[500px]'>Ikuti tes akademik, minat, dan bakat untuk menemukan jurusan yang paling sesuai dengan dirimu sehingga kamu dapat belajar dengan lebih percaya diri.</p>
-                <button className='w-[500px] flex flex-row gap-3 items-center justify-center font-bold text-[15px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 text-white py-4'>
+                <button onClick={()=>{router.push('/soal')}} className='w-[500px] flex flex-row gap-3 items-center justify-center font-bold text-[15px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 text-white py-4 transition-transform duration-300 hover:scale-105'>
                     Mulai Tes
                     <svg
                     className="w-5 h-5 text-white"
