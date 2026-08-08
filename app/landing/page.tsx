@@ -907,7 +907,7 @@ const LandingPage = () => {
 
       {/* ===== TOP NAVBAR ===== */}
       <div className="relative z-20 px-3 pt-3 pb-2 sm:px-6 sm:pt-5 lg:px-8">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between rounded-2xl border border-white/70 bg-white/75 px-3 py-3 shadow-sm backdrop-blur-md sm:px-5">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between rounded-2xl px-3 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-200 sm:h-10 sm:w-10 sm:rounded-2xl">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
