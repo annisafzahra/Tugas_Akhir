@@ -1974,6 +1974,466 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
       }
     };
 
+    const handleDownloadTemplate = () => {
+      // =====================================================
+      // 1. HEADER TEMPLATE
+      // =====================================================
+      const headers = [
+        'nama_lengkap',
+        'kelas',
+        'usia',
+        'kelamin',
+        'username',
+        'email',
+        'password',
+      ];
+    
+      // Sheet utama sengaja hanya berisi header.
+      // Jadi data contoh tidak ikut ter-import secara tidak sengaja.
+      const worksheet = XLSX.utils.aoa_to_sheet([
+        headers,
+      ]);
+    
+      // =====================================================
+      // 2. STYLE HEADER
+      // =====================================================
+      headers.forEach((_, index) => {
+        const address = XLSX.utils.encode_cell({
+          r: 0,
+          c: index,
+        });
+    
+        if (!worksheet[address]) return;
+    
+        worksheet[address].s = {
+          fill: {
+            fgColor: {
+              rgb: '2563EB',
+            },
+          },
+    
+          font: {
+            bold: true,
+            color: {
+              rgb: 'FFFFFF',
+            },
+            sz: 11,
+          },
+    
+          alignment: {
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: true,
+          },
+    
+          border: {
+            top: {
+              style: 'thin',
+              color: {
+                rgb: 'DBEAFE',
+              },
+            },
+            bottom: {
+              style: 'thin',
+              color: {
+                rgb: 'DBEAFE',
+              },
+            },
+            left: {
+              style: 'thin',
+              color: {
+                rgb: 'DBEAFE',
+              },
+            },
+            right: {
+              style: 'thin',
+              color: {
+                rgb: 'DBEAFE',
+              },
+            },
+          },
+        };
+      });
+    
+      // =====================================================
+      // 3. LEBAR KOLOM
+      // =====================================================
+      worksheet['!cols'] = [
+        { wch: 28 }, // nama_lengkap
+        { wch: 12 }, // kelas
+        { wch: 10 }, // usia
+        { wch: 14 }, // kelamin
+        { wch: 20 }, // username
+        { wch: 30 }, // email
+        { wch: 20 }, // password
+      ];
+    
+      worksheet['!rows'] = [
+        { hpt: 28 },
+      ];
+    
+      // =====================================================
+      // 4. SHEET PETUNJUK
+      // =====================================================
+      const petunjukData = [
+        [
+          'PETUNJUK PENGISIAN TEMPLATE IMPORT SISWA',
+          '',
+          '',
+          '',
+          '',
+        ],
+    
+        ['', '', '', '', ''],
+    
+        [
+          'Nama Kolom',
+          'Wajib',
+          'Penjelasan',
+          'Contoh',
+          'Ketentuan',
+        ],
+    
+        [
+          'nama_lengkap',
+          'Ya',
+          'Nama lengkap siswa yang akan dibuat sebagai akun.',
+          'Ahmad Fauzan',
+          'Isi sesuai nama lengkap siswa.',
+        ],
+    
+        [
+          'kelas',
+          'Ya',
+          'Kelas siswa saat ini.',
+          '9 A',
+          'Gunakan format kelas yang konsisten, misalnya 9 A, 9 B, dan seterusnya.',
+        ],
+    
+        [
+          'usia',
+          'Ya',
+          'Usia siswa dalam satuan tahun.',
+          '15',
+          'Harus berupa angka dengan rentang usia 10 sampai 18 tahun.',
+        ],
+    
+        [
+          'kelamin',
+          'Ya',
+          'Jenis kelamin siswa.',
+          'pria',
+          'Isi dengan "pria" atau "wanita".',
+        ],
+    
+        [
+          'username',
+          'Ya',
+          'Username yang nantinya digunakan siswa untuk login.',
+          'ahmadf',
+          'Username harus unik dan minimal 4 karakter.',
+        ],
+    
+        [
+          'email',
+          'Ya',
+          'Alamat email siswa.',
+          'ahmad.fauzan@gmail.com',
+          'Gunakan format email yang valid.',
+        ],
+    
+        [
+          'password',
+          'Ya',
+          'Password awal yang digunakan siswa untuk login.',
+          'Ahmad123',
+          'Password minimal 6 karakter.',
+        ],
+    
+        ['', '', '', '', ''],
+    
+        [
+          'CATATAN',
+          '',
+          '',
+          '',
+          '',
+        ],
+    
+        [
+          'Jangan mengubah nama header pada sheet "Import Siswa". Isi data siswa mulai dari baris ke-2.',
+          '',
+          '',
+          '',
+          '',
+        ],
+    
+        [
+          'Pastikan username setiap siswa berbeda agar proses import tidak gagal.',
+          '',
+          '',
+          '',
+          '',
+        ],
+    
+        [
+          'Setelah semua data diisi, simpan file dalam format .xlsx kemudian pilih tombol Import Siswa pada aplikasi.',
+          '',
+          '',
+          '',
+          '',
+        ],
+      ];
+    
+      const petunjukSheet =
+        XLSX.utils.aoa_to_sheet(petunjukData);
+    
+      // =====================================================
+      // 5. MERGE PETUNJUK
+      // =====================================================
+      petunjukSheet['!merges'] = [
+        XLSX.utils.decode_range('A1:E1'),
+        XLSX.utils.decode_range('A12:E12'),
+        XLSX.utils.decode_range('A13:E13'),
+        XLSX.utils.decode_range('A14:E14'),
+        XLSX.utils.decode_range('A15:E15'),
+      ];
+    
+      // =====================================================
+      // 6. STYLE JUDUL PETUNJUK
+      // =====================================================
+      if (petunjukSheet['A1']) {
+        petunjukSheet['A1'].s = {
+          fill: {
+            fgColor: {
+              rgb: '2563EB',
+            },
+          },
+    
+          font: {
+            bold: true,
+            color: {
+              rgb: 'FFFFFF',
+            },
+            sz: 14,
+          },
+    
+          alignment: {
+            horizontal: 'center',
+            vertical: 'center',
+          },
+        };
+      }
+    
+      // =====================================================
+      // 7. STYLE HEADER TABEL PETUNJUK
+      // =====================================================
+      for (let col = 0; col <= 4; col++) {
+        const address = XLSX.utils.encode_cell({
+          r: 2,
+          c: col,
+        });
+    
+        if (!petunjukSheet[address]) continue;
+    
+        petunjukSheet[address].s = {
+          fill: {
+            fgColor: {
+              rgb: 'DBEAFE',
+            },
+          },
+    
+          font: {
+            bold: true,
+            color: {
+              rgb: '1E3A8A',
+            },
+          },
+    
+          alignment: {
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: true,
+          },
+    
+          border: {
+            top: {
+              style: 'thin',
+              color: {
+                rgb: 'CBD5E1',
+              },
+            },
+            bottom: {
+              style: 'thin',
+              color: {
+                rgb: 'CBD5E1',
+              },
+            },
+            left: {
+              style: 'thin',
+              color: {
+                rgb: 'CBD5E1',
+              },
+            },
+            right: {
+              style: 'thin',
+              color: {
+                rgb: 'CBD5E1',
+              },
+            },
+          },
+        };
+      }
+    
+      // =====================================================
+      // 8. STYLE ISI PETUNJUK
+      // =====================================================
+      for (let row = 3; row <= 9; row++) {
+        for (let col = 0; col <= 4; col++) {
+          const address = XLSX.utils.encode_cell({
+            r: row,
+            c: col,
+          });
+    
+          if (!petunjukSheet[address]) continue;
+    
+          petunjukSheet[address].s = {
+            alignment: {
+              vertical: 'top',
+              wrapText: true,
+            },
+    
+            border: {
+              top: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+              bottom: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+              left: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+              right: {
+                style: 'thin',
+                color: {
+                  rgb: 'E2E8F0',
+                },
+              },
+            },
+          };
+        }
+      }
+    
+      // =====================================================
+      // 9. STYLE CATATAN
+      // =====================================================
+      if (petunjukSheet['A12']) {
+        petunjukSheet['A12'].s = {
+          fill: {
+            fgColor: {
+              rgb: 'FEF3C7',
+            },
+          },
+    
+          font: {
+            bold: true,
+            color: {
+              rgb: '92400E',
+            },
+          },
+        };
+      }
+    
+      ['A13', 'A14', 'A15'].forEach((address) => {
+        if (!petunjukSheet[address]) return;
+    
+        petunjukSheet[address].s = {
+          fill: {
+            fgColor: {
+              rgb: 'FFFBEB',
+            },
+          },
+    
+          font: {
+            color: {
+              rgb: '78350F',
+            },
+          },
+    
+          alignment: {
+            vertical: 'center',
+            wrapText: true,
+          },
+        };
+      });
+    
+      // =====================================================
+      // 10. UKURAN KOLOM PETUNJUK
+      // =====================================================
+      petunjukSheet['!cols'] = [
+        { wch: 22 },
+        { wch: 10 },
+        { wch: 45 },
+        { wch: 30 },
+        { wch: 48 },
+      ];
+    
+      petunjukSheet['!rows'] = [
+        { hpt: 30 },
+        { hpt: 10 },
+        { hpt: 28 },
+        { hpt: 40 },
+        { hpt: 45 },
+        { hpt: 45 },
+        { hpt: 40 },
+        { hpt: 45 },
+        { hpt: 40 },
+        { hpt: 45 },
+        { hpt: 10 },
+        { hpt: 25 },
+        { hpt: 35 },
+        { hpt: 35 },
+        { hpt: 45 },
+      ];
+    
+      // =====================================================
+      // 11. BUAT WORKBOOK
+      // =====================================================
+      const workbook =
+        XLSX.utils.book_new();
+    
+      // PENTING:
+      // Import Siswa harus menjadi sheet PERTAMA
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        'Import Siswa'
+      );
+    
+      XLSX.utils.book_append_sheet(
+        workbook,
+        petunjukSheet,
+        'Petunjuk'
+      );
+    
+      // =====================================================
+      // 12. DOWNLOAD
+      // =====================================================
+      XLSX.writeFile(
+        workbook,
+        'Template_Import_Siswa.xlsx'
+      );
+    };
+
   return (
     <div className="relative min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-gradient-to-br from-sky-50 via-white to-indigo-100 px-3 py-3 sm:px-4 md:px-8 md:py-8">
       <div className="pointer-events-none absolute -top-24 -left-20 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl md:h-80 md:w-80" />
@@ -2744,51 +3204,129 @@ const AdminPage = ({ onLogout }: { onLogout: () => void }) => {
                 {isLoading ? 'Menyimpan...' : formMode === 'tambah' ? 'Tambah Siswa' : 'Simpan Perubahan'}
               </button>
             </div>
-            <button
-              onClick={() =>
-                importFileRef.current?.click()
-              }
-              disabled={isLoading}
-              className="
-                mt-3 w-full
-                inline-flex items-center
-                justify-center gap-2
-                rounded-xl
-                bg-emerald-500
-                px-4 py-2.5
-                text-xs font-semibold
-                text-white
-                shadow-lg
-                shadow-emerald-100
-                transition
-                hover:-translate-y-0.5
-                hover:bg-emerald-600
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-                md:rounded-2xl
-                md:px-5
-                md:py-3
-                md:text-sm
-              "
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 16V4m0 0L8 8m4-4 4 4M5 20h14"
-                />
-              </svg>
+            <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
 
-              {isLoading
-                ? 'Mengimport...'
-                : 'Import Siswa'}
-            </button>
+                <div>
+                  <p className="text-xs font-semibold text-slate-700 md:text-sm">
+                    Import Data Siswa
+                  </p>
+
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-500 md:text-xs">
+                    Sebelum mengimport data siswa, silakan download
+                    template Excel terlebih dahulu. Isi data sesuai
+                    format yang tersedia, kemudian upload kembali
+                    melalui tombol Import Siswa.
+                  </p>
+                </div>
+              </div>
+
+              {/* DOWNLOAD TEMPLATE */}
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={isLoading}
+                className="
+                  mt-3
+                  inline-flex w-full
+                  items-center justify-center
+                  gap-2 rounded-xl
+                  border border-blue-200
+                  bg-white
+                  px-4 py-2.5
+                  text-xs font-semibold
+                  text-blue-600
+                  shadow-sm
+                  transition
+                  hover:-translate-y-0.5
+                  hover:border-blue-300
+                  hover:bg-blue-50
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  md:rounded-2xl
+                  md:text-sm
+                "
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v12m0 0l-4-4m4 4 4-4M5 20h14"
+                  />
+                </svg>
+
+                Download Template Excel
+              </button>
+
+              {/* IMPORT SISWA */}
+              <button
+                type="button"
+                onClick={() =>
+                  importFileRef.current?.click()
+                }
+                disabled={isLoading}
+                className="
+                  mt-2 w-full
+                  inline-flex items-center
+                  justify-center gap-2
+                  rounded-xl
+                  bg-emerald-500
+                  px-4 py-2.5
+                  text-xs font-semibold
+                  text-white
+                  shadow-lg
+                  shadow-emerald-100
+                  transition
+                  hover:-translate-y-0.5
+                  hover:bg-emerald-600
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  md:rounded-2xl
+                  md:px-5
+                  md:py-3
+                  md:text-sm
+                "
+              >
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 16V4m0 0L8 8m4-4 4 4M5 20h14"
+                  />
+                </svg>
+
+                {isLoading
+                  ? 'Mengimport...'
+                  : 'Import Siswa'}
+              </button>
+            </div>
           </div>
         </div>
       )}

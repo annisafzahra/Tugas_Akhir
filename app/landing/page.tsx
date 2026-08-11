@@ -1,55 +1,21 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { soalList } from '@/lib/data/dataSoal';
 import { soalBakat } from '@/lib/data/dataBakat';
-import { dataAkademik } from '@/lib/data/dataAkademik';
-import { getMe, submitTes } from '@/lib/function/api';
-import { useRouter } from 'next/navigation';
-import { UserType } from '@/type/dataHasilTestType';
+import { soalList } from '@/lib/data/dataSoal';
+import { getMe } from '@/lib/function/api';
 import dataHasilTest from '@/lib/function/dataHasilTest';
-import Image from 'next/image';
-import { jsPDF } from 'jspdf';
+import { UserType } from '@/type/dataHasilTestType';
 import html2canvas from 'html2canvas';
-
-const deskripsiJurusan: Record<string, string> = {
-    IPA: 'Jurusan ini sesuai bagi siswa yang menyukai sains, logika, dan pemecahan masalah secara sistematis.',
-    IPS: 'Jurusan ini sesuai bagi siswa yang tertarik mempelajari ekonomi, masyarakat, dan berbagai fenomena sosial.',
-    Bahasa: 'Jurusan ini sesuai bagi siswa yang menyukai komunikasi, literasi, serta pembelajaran bahasa dan budaya.',
-    AKL: 'Jurusan ini sesuai bagi siswa yang teliti dan tertarik pada bidang keuangan, administrasi, serta pengelolaan data.',
-    TKJ: 'Jurusan ini sesuai bagi siswa yang tertarik pada komputer, teknologi informasi, dan jaringan.',
-    TKRO: 'Jurusan ini sesuai bagi siswa yang menyukai dunia otomotif, mesin, dan teknologi kendaraan.',
-  };
-
-  const getDeskripsiJurusan = (
-    jurusan: string,
-    sumber: 'akademik' | 'minat' | 'bakat'
-  ) => {
-    const deskripsi = deskripsiJurusan[jurusan] || '';
-  
-    const prefixMap = {
-      akademik: `Berdasarkan hasil tes akademik, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}.`,
-      minat: `Berdasarkan hasil tes minat RIASEC, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}.`,
-      bakat: `Berdasarkan hasil tes bakat, kamu memiliki kecocokan yang tinggi pada jurusan ${jurusan}.`,
-    };
-  
-    return `${prefixMap[sumber]} ${deskripsi}`;
-  };
+import { jsPDF } from 'jspdf';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 
 const LandingPage = () => {
   const router = useRouter();
-  const [step, setStep] = useState(1);
   const [idNumber, setIdNumber] = useState(0);
   const { hasilTestSiswa } = dataHasilTest(idNumber);
-  const [jawabanRiasec, setJawabanRiasec] = useState<any[]>([]);
-  const [jawabanBakat, setJawabanBakat] = useState<any[]>([]);
-  const [akademik, setAkademik] = useState({
-    mtk: 0,
-    indo: 0,
-    ipa: 0,
-    ips: 0,
-  });
   const [me, setMe] = useState<UserType>({
     id: 0,
     username: '',
@@ -65,109 +31,12 @@ const LandingPage = () => {
   const [showLogout, setShowLogout] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const [isDraftLoaded, setIsDraftLoaded] = useState(false);
-  const [selected, setSelected] = useState<UserType | null>(null);
-  const [hasilList, setHasilList] = useState<any[]>([]);
-  const [isDetailTes, setIsDetailTes] = useState(0);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [pickHapus, setPickHapus] = useState(0);
-  
-  const getHasilListSiswa = (siswa: UserType) => {
-    return hasilList.filter((item) => {
-      const sameId = item.user?.id && siswa.id && item.user.id === siswa.id;
-      const sameName =
-        item.user?.nama_lengkap?.toLowerCase() === siswa.nama_lengkap?.toLowerCase();
-      return sameId || sameName;
-    });
-  };
-  const selectedHasilList = selected ? getHasilListSiswa(selected) : [];
-
   const formatTanggal = (date?: string) => {
     if (!date) return '-';
     return date.split('T')[0];
   };
 
-
-  const getDraftKey = () => {
-    const userId = localStorage.getItem('user_id_jurusan');
-    return `draft_soal_jurusan_${userId || 'guest'}`;
-  };
-
-  const defaultRiasecAnswers = () =>
-    soalList.map((item) => ({
-      soal_id: item.id,
-      nilai: 0,
-    }));
-
-  const defaultBakatAnswers = () =>
-    soalBakat.map((item) => ({
-      soal_id: item.id,
-      jawaban: '',
-      nilai: 0,
-    }));
-
-  // ===== REFS UNTUK SCROLL =====
-  const contentRef = useRef<HTMLDivElement>(null);
-
   const allowLeaveRef = useRef(false);
-
-  useEffect(() => {
-    const savedDraft = localStorage.getItem(getDraftKey());
-  
-    if (savedDraft) {
-      try {
-        const draft = JSON.parse(savedDraft);
-  
-        setStep(draft.step || 1);
-  
-        setAkademik(
-          draft.akademik || {
-            mtk: 0,
-            indo: 0,
-            ipa: 0,
-            ips: 0,
-          }
-        );
-  
-        setJawabanRiasec(
-          draft.jawabanRiasec?.length
-            ? draft.jawabanRiasec
-            : defaultRiasecAnswers()
-        );
-  
-        setJawabanBakat(
-          draft.jawabanBakat?.length
-            ? draft.jawabanBakat
-            : defaultBakatAnswers()
-        );
-      } catch (error) {
-        console.log('Draft rusak, reset ulang:', error);
-  
-        localStorage.removeItem(getDraftKey());
-  
-        setJawabanRiasec(defaultRiasecAnswers());
-        setJawabanBakat(defaultBakatAnswers());
-      }
-    } else {
-      setJawabanRiasec(defaultRiasecAnswers());
-      setJawabanBakat(defaultBakatAnswers());
-    }
-  
-    setIsDraftLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isDraftLoaded) return;
-  
-    const draft = {
-      step,
-      akademik,
-      jawabanRiasec,
-      jawabanBakat,
-    };
-  
-    localStorage.setItem(getDraftKey(), JSON.stringify(draft));
-  }, [step, akademik, jawabanRiasec, jawabanBakat, isDraftLoaded]);
 
   useEffect(()=>{
     const fetch = async () => {
@@ -203,12 +72,6 @@ const LandingPage = () => {
     };
   }, []);
 
-  // ===== SCROLL TO TOP SAAT PINDAH STEP =====
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [step]);
 
   const handleLogout = () => {
     allowLeaveRef.current = true;
@@ -1358,78 +1221,7 @@ const LandingPage = () => {
                                     </div>
                                 </div>
                                 </div>
-                                {isDetailTes === hasil.id && (
-
-                                <div className="mt-4 flex h-auto flex-col items-stretch gap-3 md:flex-row md:items-stretch md:justify-between md:gap-4">
-                                    <div className='flex min-w-0 flex-1 flex-col rounded-2xl border border-blue-200 bg-blue-50 p-4'>
-                                    <p className='mb-2 font-bold text-blue-500'>Akademik</p>
-                                    <div className='flex flex-col gap-2'>
-                                        <div className='w-full flex flex-row justify-between'>
-                                        <p className='text-blue-800'>MTK :</p>
-                                        <p className='text-blue-800'>{hasil.mtk || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-blue-800'>Bahasa :</p>
-                                        <p className='text-blue-800'>{hasil.indo || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-blue-800'>IPA :</p>
-                                        <p className='text-blue-800'>{hasil.ipa || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-blue-800'>IPS :</p>
-                                        <p className='text-blue-800'>{hasil.ips || '-'}</p>
-                                        </div>
-                                    </div>
-                                    </div>
-                                    <div className='flex min-w-0 flex-1 flex-col rounded-2xl border border-purple-200 bg-purple-50 p-4'>
-                                    <p className='mb-2 font-bold text-purple-500'>Minat (RIASEC)</p>
-                                    <div className='flex flex-col gap-2'>
-                                        <div className='w-full flex flex-row justify-between'>
-                                        <p className='text-purple-800'>Realistic :</p>
-                                        <p className='text-purple-800'>{hasil.realistic || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-purple-800'>Investigative :</p>
-                                        <p className='text-purple-800'>{hasil.investigative || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-purple-800'>Artistic :</p>
-                                        <p className='text-purple-800'>{hasil.artistic || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-purple-800'>Social :</p>
-                                        <p className='text-purple-800'>{hasil.social || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-purple-800'>Enterprising :</p>
-                                        <p className='text-purple-800'>{hasil.enterprising || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-purple-800'>Conventional :</p>
-                                        <p className='text-purple-800'>{hasil.conventional || '-'}</p>
-                                        </div>
-                                    </div>
-                                    </div>
-                                    <div className='flex min-w-0 flex-1 flex-col rounded-2xl border border-emerald-200 bg-emerald-50 p-4'>
-                                    <p className='mb-2 font-bold text-emerald-500'>Bakat</p>
-                                    <div className='flex flex-col gap-2'>
-                                        <div className='w-full flex flex-row justify-between'>
-                                        <p className='text-emerald-800'>Logika :</p>
-                                        <p className='text-emerald-800'>{hasil.logika || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-emerald-800'>Verbal :</p>
-                                        <p className='text-emerald-800'>{hasil.verbal || '-'}</p>
-                                        </div>
-                                        <div className='flex flex-row justify-between'>
-                                        <p className='text-emerald-800'>Mekanikal :</p>
-                                        <p className='text-emerald-800'>{hasil.mekanikal || '-'}</p>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
-                                )}
+                                
 
                                 <div className="mt-3 flex justify-stretch gap-2 border-t border-slate-100 pt-3 sm:justify-end md:mt-4 md:pt-4">
                                 <button
