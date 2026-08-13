@@ -1135,7 +1135,7 @@ const LandingPage = () => {
       </div>
 
       {/* ===== TOP NAVBAR ===== */}
-      <div className="relative z-20 px-3 pt-3 pb-2 sm:px-6 sm:pt-5 lg:px-8">
+      <div className="relative z-60 px-3 pt-3 pb-2 sm:px-6 sm:pt-5 lg:px-8">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between rounded-2xl px-3 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-200 sm:h-10 sm:w-10 sm:rounded-2xl">
@@ -1159,8 +1159,8 @@ const LandingPage = () => {
 
             {showDropdown && (
               <>
-                <div className="fixed inset-0 z-30" onClick={() => setShowDropdown(false)}></div>
-                <div className="absolute right-0 z-40 mt-2 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-100 bg-white py-2 shadow-xl">
+                <div className="fixed inset-0 z-70" onClick={() => setShowDropdown(false)}></div>
+                <div className="absolute right-0 z-80 mt-2 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-100 bg-white py-2 shadow-xl">
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="text-sm font-semibold text-slate-800">{me.nama_lengkap}</p>
                     <p className="text-xs text-slate-500">Kelas {me.kelas}</p>
@@ -1227,364 +1227,303 @@ const LandingPage = () => {
       </div>
       
       
-            {/* ===== DETAIL JURUSAN ===== */}
-            <div className="relative z-10 flex bg-blue-500 -top-[50px] items-center justify-center px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-              <div className="w-full px-[200px]">
-
-                <div className="grid grid-cols-1 py-[70px] items-start gap-8 lg:grid-cols-[0.78fr_1.7fr] lg:gap-10">
-
-                {/* ===== BAGIAN KIRI ===== */}
-                <div className="flex flex-col items-center pt-0 text-center lg:items-start lg:pt-4 lg:text-left">
-                    <p className="mb-3 w-fit rounded-full border border-white px-5 py-2 text-center text-sm font-semibold text-white sm:px-6">
-                    Detail Jurusan
-                    </p>
-
-                    <h2 className="mb-4 max-w-md text-[26px] font-bold leading-[1.15] text-white sm:text-[30px] lg:mb-5">
-                    Kenali Jurusan yang
-                    Sesuai dengan Dirimu
-                    </h2>
-
-                    <p className="max-w-md text-sm leading-relaxed text-white sm:text-[15px] lg:max-w-[320px]">
-                    Setiap jurusan memiliki bidang pembelajaran dan karakteristik yang
-                    berbeda. Kenali masing-masing jurusan agar kamu dapat memahami
-                    pilihan yang sesuai dengan minat, kemampuan, dan bakatmu.
-                    </p>
-                </div>
-
-                {/* ===== BAGIAN KANAN ===== */}
-                <div
-                    className="
-                    flex
-                    w-full
-                    gap-4
-                    overflow-x-auto
-                    pb-5
-                    pr-2
-                    scroll-smooth
-                    snap-x
-                    snap-mandatory
-                    sm:gap-5
-
-                    [&::-webkit-scrollbar]:h-2
-                    [&::-webkit-scrollbar-track]:bg-slate-100
-                    [&::-webkit-scrollbar-track]:rounded-full
-                    [&::-webkit-scrollbar-thumb]:bg-blue-300
-                    [&::-webkit-scrollbar-thumb]:rounded-full
-                    "
-                >
-
-                    {/* ================= IPA ================= */}
-                    <div className="min-w-[280px] max-w-[280px] h-[530px] sm:min-w-[320px] sm:max-w-[320px] sm:min-h-[450px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
-                    <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-[28px] mb-5">
-                        🔬
-                    </div>
-
-                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
-                        IPA
-                    </h3>
-
-                    <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
-                        Jurusan IPA mempelajari berbagai ilmu tentang alam, seperti
-                        Matematika, Fisika, Kimia, dan Biologi.
-                    </p>
-
-                    <div className="mt-5">
-                        <p className="text-[14px] font-semibold text-slate-700 mb-3">
-                        Cocok untuk kamu yang:
-                        </p>
-
-                        <ul className="space-y-2 text-[14px] text-slate-500">
-                        <li className="flex items-start gap-2">
-                            <span className="text-blue-500 font-bold">✓</span>
-                            Menyukai pelajaran sains.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-blue-500 font-bold">✓</span>
-                            Senang berpikir logis.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-blue-500 font-bold">✓</span>
-                            Memiliki rasa ingin tahu yang tinggi.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-blue-500 font-bold">✓</span>
-                            Tertarik melakukan eksperimen.
-                        </li>
-                        </ul>
-                    </div>
-                    <button
-                        onClick={() => setSelectedJurusan('IPA')}
-                        className="mt-auto w-full rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                    >
-                        Lihat Detail
-                    </button>
-
-                    
-                    </div>
-
-
-                    {/* ================= IPS ================= */}
-                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
-                    <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-[28px] mb-5">
-                        🌍
-                    </div>
-
-                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
-                        IPS
-                    </h3>
-
-                    <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
-                        Jurusan IPS mempelajari kehidupan masyarakat, ekonomi, sejarah,
-                        geografi, dan berbagai peristiwa sosial.
-                    </p>
-
-                    <div className="mt-5">
-                        <p className="text-[14px] font-semibold text-slate-700 mb-3">
-                        Cocok untuk kamu yang:
-                        </p>
-
-                        <ul className="space-y-2 text-[14px] text-slate-500">
-                        <li className="flex items-start gap-2">
-                            <span className="text-orange-500 font-bold">✓</span>
-                            Senang berdiskusi.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-orange-500 font-bold">✓</span>
-                            Tertarik pada kehidupan sosial.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-orange-500 font-bold">✓</span>
-                            Menyukai ekonomi atau sejarah.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-orange-500 font-bold">✓</span>
-                            Memiliki kemampuan komunikasi yang baik.
-                        </li>
-                        </ul>
-                    </div>
-                    <button
-                        onClick={() => setSelectedJurusan('IPS')}
-                        className="mt-auto w-full rounded-xl bg-orange-500 hover:bg-orange-600 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                    >
-                        Lihat Detail
-                    </button>
-                    </div>
-
-
-                    {/* ================= BAHASA ================= */}
-                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
-                    <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-[28px] mb-5">
-                        📚
-                    </div>
-
-                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
-                        Bahasa
-                    </h3>
-
-                    <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
-                        Jurusan Bahasa berfokus pada kemampuan berbahasa, komunikasi,
-                        sastra, serta pemahaman berbagai budaya.
-                    </p>
-
-                    <div className="mt-5">
-                        <p className="text-[14px] font-semibold text-slate-700 mb-3">
-                        Cocok untuk kamu yang:
-                        </p>
-
-                        <ul className="space-y-2 text-[14px] text-slate-500">
-                        <li className="flex items-start gap-2">
-                            <span className="text-purple-500 font-bold">✓</span>
-                            Gemar membaca.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-purple-500 font-bold">✓</span>
-                            Senang menulis.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-purple-500 font-bold">✓</span>
-                            Tertarik belajar bahasa asing.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-purple-500 font-bold">✓</span>
-                            Suka berkomunikasi dengan orang lain.
-                        </li>
-                        </ul>
-                    </div>
-                    <button
-                        onClick={() => setSelectedJurusan('Bahasa')}
-                        className="mt-auto w-full rounded-xl bg-purple-600 hover:bg-purple-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                    >
-                        Lihat Detail
-                    </button>
-                    </div>
-
-
-                    {/* ================= TKJ ================= */}
-                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
-                    <div className="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center text-[28px] mb-5">
-                        💻
-                    </div>
-
-                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
-                        TKJ
-                    </h3>
-
-                    <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
-                        Jurusan TKJ mempelajari komputer, jaringan, perangkat keras,
-                        serta dasar-dasar teknologi informasi.
-                    </p>
-
-                    <div className="mt-5">
-                        <p className="text-[14px] font-semibold text-slate-700 mb-3">
-                        Cocok untuk kamu yang:
-                        </p>
-
-                        <ul className="space-y-2 text-[14px] text-slate-500">
-                        <li className="flex items-start gap-2">
-                            <span className="text-cyan-500 font-bold">✓</span>
-                            Menyukai komputer.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-cyan-500 font-bold">✓</span>
-                            Tertarik pada teknologi.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-cyan-500 font-bold">✓</span>
-                            Senang memecahkan masalah.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-cyan-500 font-bold">✓</span>
-                            Ingin belajar dunia IT.
-                        </li>
-                        </ul>
-                    </div>
-                    <button
-                        onClick={() => setSelectedJurusan('TKJ')}
-                        className="mt-auto w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                    >
-                        Lihat Detail
-                    </button>
-                    </div>
-
-
-                    {/* ================= AKL ================= */}
-                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
-                    <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-[28px] mb-5">
-                        💰
-                    </div>
-
-                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
-                        AKL
-                    </h3>
-
-                    <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
-                        Jurusan AKL mempelajari pengelolaan keuangan, pencatatan
-                        transaksi, dan dasar-dasar akuntansi.
-                    </p>
-
-                    <div className="mt-5">
-                        <p className="text-[14px] font-semibold text-slate-700 mb-3">
-                        Cocok untuk kamu yang:
-                        </p>
-
-                        <ul className="space-y-2 text-[14px] text-slate-500">
-                        <li className="flex items-start gap-2">
-                            <span className="text-emerald-500 font-bold">✓</span>
-                            Teliti dalam bekerja.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-emerald-500 font-bold">✓</span>
-                            Suka berhitung.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-emerald-500 font-bold">✓</span>
-                            Senang bekerja dengan data.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-emerald-500 font-bold">✓</span>
-                            Tertarik pada dunia keuangan.
-                        </li>
-                        </ul>
-                    </div>
-                    <button
-                        onClick={() => setSelectedJurusan('AKL')}
-                        className="mt-auto w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                    >
-                        Lihat Detail
-                    </button>
-                    </div>
-
-
-                    {/* ================= TKRO ================= */}
-                    <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
-                    <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-[28px] mb-5">
-                        🚗
-                    </div>
-
-                    <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
-                        TKRO
-                    </h3>
-
-                    <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
-                        Jurusan TKRO mempelajari cara kerja, perawatan, dan perbaikan
-                        kendaraan bermotor.
-                    </p>
-
-                    <div className="mt-5">
-                        <p className="text-[14px] font-semibold text-slate-700 mb-3">
-                        Cocok untuk kamu yang:
-                        </p>
-
-                        <ul className="space-y-2 text-[14px] text-slate-500">
-                        <li className="flex items-start gap-2">
-                            <span className="text-red-500 font-bold">✓</span>
-                            Menyukai dunia otomotif.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-red-500 font-bold">✓</span>
-                            Senang kegiatan praktik.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-red-500 font-bold">✓</span>
-                            Tertarik dengan mesin kendaraan.
-                        </li>
-
-                        <li className="flex items-start gap-2">
-                            <span className="text-red-500 font-bold">✓</span>
-                            Suka mempelajari cara kerja alat.
-                        </li>
-                        </ul>
-                    </div>
-                    <button
-                        onClick={() => setSelectedJurusan('TKRO')}
-                        className="mt-auto w-full rounded-xl bg-red-600 hover:bg-red-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
-                    >
-                        Lihat Detail
-                    </button>
-                    </div>
-
-                </div>
-                </div>
-            </div>
-            </div>
-      
+      {/* ===== DETAIL JURUSAN ===== */}
+      <div className="relative z-10 flex bg-blue-500 -top-[50px] items-center justify-center px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div className="w-full px-[200px]">
+          <div className="grid grid-cols-1 py-[70px] items-start gap-8 lg:grid-cols-[0.78fr_1.7fr] lg:gap-10">
+          {/* ===== BAGIAN KIRI ===== */}
+          <div className="flex flex-col items-center pt-0 text-center lg:items-start lg:pt-4 lg:text-left">
+              <p className="mb-3 w-fit rounded-full border border-white px-5 py-2 text-center text-sm font-semibold text-white sm:px-6">
+              Detail Jurusan
+              </p>
+              <h2 className="mb-4 max-w-md text-[26px] font-bold leading-[1.15] text-white sm:text-[30px] lg:mb-5">
+              Kenali Jurusan yang
+              Sesuai dengan Dirimu
+              </h2>
+              <p className="max-w-md text-sm leading-relaxed text-white sm:text-[15px] lg:max-w-[320px]">
+              Setiap jurusan memiliki bidang pembelajaran dan karakteristik yang
+              berbeda. Kenali masing-masing jurusan agar kamu dapat memahami
+              pilihan yang sesuai dengan minat, kemampuan, dan bakatmu.
+              </p>
+          </div>
+          {/* ===== BAGIAN KANAN ===== */}
+          <div
+              className="
+              flex
+              w-full
+              gap-4
+              overflow-x-auto
+              pb-5
+              pr-2
+              scroll-smooth
+              snap-x
+              snap-mandatory
+              sm:gap-5
+              [&::-webkit-scrollbar]:h-2
+              [&::-webkit-scrollbar-track]:bg-slate-100
+              [&::-webkit-scrollbar-track]:rounded-full
+              [&::-webkit-scrollbar-thumb]:bg-blue-300
+              [&::-webkit-scrollbar-thumb]:rounded-full
+              "
+          >
+              {/* ================= IPA ================= */}
+              <div className="min-w-[280px] max-w-[280px] h-[530px] sm:min-w-[320px] sm:max-w-[320px] sm:min-h-[450px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-[28px] mb-5">
+                  🔬
+              </div>
+              <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
+                  IPA
+              </h3>
+              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+                  Jurusan IPA mempelajari berbagai ilmu tentang alam, seperti
+                  Matematika, Fisika, Kimia, dan Biologi.
+              </p>
+              <div className="mt-5">
+                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  Cocok untuk kamu yang:
+                  </p>
+                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-bold">✓</span>
+                      Menyukai pelajaran sains.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-bold">✓</span>
+                      Senang berpikir logis.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-bold">✓</span>
+                      Memiliki rasa ingin tahu yang tinggi.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-blue-500 font-bold">✓</span>
+                      Tertarik melakukan eksperimen.
+                  </li>
+                  </ul>
+              </div>
+              <button
+                  onClick={() => setSelectedJurusan('IPA')}
+                  className="mt-auto w-full rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+              >
+                  Lihat Detail
+              </button>
+              
+              </div>
+              {/* ================= IPS ================= */}
+              <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-[28px] mb-5">
+                  🌍
+              </div>
+              <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
+                  IPS
+              </h3>
+              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+                  Jurusan IPS mempelajari kehidupan masyarakat, ekonomi, sejarah,
+                  geografi, dan berbagai peristiwa sosial.
+              </p>
+              <div className="mt-5">
+                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  Cocok untuk kamu yang:
+                  </p>
+                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <li className="flex items-start gap-2">
+                      <span className="text-orange-500 font-bold">✓</span>
+                      Senang berdiskusi.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-orange-500 font-bold">✓</span>
+                      Tertarik pada kehidupan sosial.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-orange-500 font-bold">✓</span>
+                      Menyukai ekonomi atau sejarah.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-orange-500 font-bold">✓</span>
+                      Memiliki kemampuan komunikasi yang baik.
+                  </li>
+                  </ul>
+              </div>
+              <button
+                  onClick={() => setSelectedJurusan('IPS')}
+                  className="mt-auto w-full rounded-xl bg-orange-500 hover:bg-orange-600 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+              >
+                  Lihat Detail
+              </button>
+              </div>
+              {/* ================= BAHASA ================= */}
+              <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-[28px] mb-5">
+                  📚
+              </div>
+              <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
+                  Bahasa
+              </h3>
+              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+                  Jurusan Bahasa berfokus pada kemampuan berbahasa, komunikasi,
+                  sastra, serta pemahaman berbagai budaya.
+              </p>
+              <div className="mt-5">
+                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  Cocok untuk kamu yang:
+                  </p>
+                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <li className="flex items-start gap-2">
+                      <span className="text-purple-500 font-bold">✓</span>
+                      Gemar membaca.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-purple-500 font-bold">✓</span>
+                      Senang menulis.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-purple-500 font-bold">✓</span>
+                      Tertarik belajar bahasa asing.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-purple-500 font-bold">✓</span>
+                      Suka berkomunikasi dengan orang lain.
+                  </li>
+                  </ul>
+              </div>
+              <button
+                  onClick={() => setSelectedJurusan('Bahasa')}
+                  className="mt-auto w-full rounded-xl bg-purple-600 hover:bg-purple-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+              >
+                  Lihat Detail
+              </button>
+              </div>
+              {/* ================= TKJ ================= */}
+              <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-100 flex items-center justify-center text-[28px] mb-5">
+                  💻
+              </div>
+              <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
+                  TKJ
+              </h3>
+              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+                  Jurusan TKJ mempelajari komputer, jaringan, perangkat keras,
+                  serta dasar-dasar teknologi informasi.
+              </p>
+              <div className="mt-5">
+                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  Cocok untuk kamu yang:
+                  </p>
+                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 font-bold">✓</span>
+                      Menyukai komputer.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 font-bold">✓</span>
+                      Tertarik pada teknologi.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 font-bold">✓</span>
+                      Senang memecahkan masalah.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-cyan-500 font-bold">✓</span>
+                      Ingin belajar dunia IT.
+                  </li>
+                  </ul>
+              </div>
+              <button
+                  onClick={() => setSelectedJurusan('TKJ')}
+                  className="mt-auto w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+              >
+                  Lihat Detail
+              </button>
+              </div>
+              {/* ================= AKL ================= */}
+              <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-[28px] mb-5">
+                  💰
+              </div>
+              <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
+                  AKL
+              </h3>
+              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+                  Jurusan AKL mempelajari pengelolaan keuangan, pencatatan
+                  transaksi, dan dasar-dasar akuntansi.
+              </p>
+              <div className="mt-5">
+                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  Cocok untuk kamu yang:
+                  </p>
+                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <li className="flex items-start gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      Teliti dalam bekerja.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      Suka berhitung.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      Senang bekerja dengan data.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      Tertarik pada dunia keuangan.
+                  </li>
+                  </ul>
+              </div>
+              <button
+                  onClick={() => setSelectedJurusan('AKL')}
+                  className="mt-auto w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+              >
+                  Lihat Detail
+              </button>
+              </div>
+              {/* ================= TKRO ================= */}
+              <div className="min-w-[280px] max-w-[280px] min-h-[430px] sm:min-w-[320px] sm:max-w-[320px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center text-[28px] mb-5">
+                  🚗
+              </div>
+              <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
+                  TKRO
+              </h3>
+              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+                  Jurusan TKRO mempelajari cara kerja, perawatan, dan perbaikan
+                  kendaraan bermotor.
+              </p>
+              <div className="mt-5">
+                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  Cocok untuk kamu yang:
+                  </p>
+                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">✓</span>
+                      Menyukai dunia otomotif.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">✓</span>
+                      Senang kegiatan praktik.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">✓</span>
+                      Tertarik dengan mesin kendaraan.
+                  </li>
+                  <li className="flex items-start gap-2">
+                      <span className="text-red-500 font-bold">✓</span>
+                      Suka mempelajari cara kerja alat.
+                  </li>
+                  </ul>
+              </div>
+              <button
+                  onClick={() => setSelectedJurusan('TKRO')}
+                  className="mt-auto w-full rounded-xl bg-red-600 hover:bg-red-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+              >
+                  Lihat Detail
+              </button>
+              </div>
+          </div>
+          </div>
+      </div>
+      </div>
+  
       
 
       {/* ===== POPUP DETAIL JURUSAN ===== */}
@@ -1757,14 +1696,14 @@ const LandingPage = () => {
       )}
 
       {/* ===== MAIN CONTENT ===== */}
-      <div className="relative z-10 mb-16 flex items-center justify-center px-4 py-6 sm:px-6 lg:mb-24 lg:px-8">
+      <div className="relative -top-[100px] z-10 mb-16 flex items-center justify-center px-4 py-6 sm:px-6 lg:mb-24 lg:px-8">
       <div className="w-full lg:w-[70%]">
 
         <div className="
           relative
           overflow-hidden
           rounded-[32px]
-          border border-blue-200
+          border border-blue-500
           bg-white
           p-4
           shadow-[0_20px_60px_rgba(59,130,246,0.12)]
@@ -2209,7 +2148,146 @@ const LandingPage = () => {
         </div>
 
       </div>
-    </div>
+      </div>
+
+      {/* ================= FOOTER ================= */}
+      <footer className="relative overflow-hidden bg-[#073c7d] text-white">
+        {/* dekorasi background */}
+        <div className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 right-10 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
+
+        <div className="relative mx-auto w-full max-w-6xl px-6 pb-6 pt-12 sm:px-8 lg:px-10 lg:pt-14">
+
+          {/* ===== BAGIAN ATAS ===== */}
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+
+            {/* ===== BRAND ===== */}
+            <div className="max-w-[300px]">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-950/30">
+                  <svg
+                    className="h-5 w-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                </div>
+
+                <h3 className="text-xl font-extrabold tracking-tight">
+                  My<span className="text-blue-400">Jurusan</span>
+                </h3>
+              </div>
+
+              <p className="mt-4 text-sm leading-6 text-slate-400">
+                Temukan jurusan yang sesuai dengan kemampuan akademik,
+                minat, dan bakatmu untuk membantu menentukan pilihan
+                pendidikan selanjutnya.
+              </p>
+            </div>
+
+
+            {/* ===== EXPLORE ===== */}
+            <div>
+              <h4 className="mb-4 text-sm font-bold text-white">
+                Jelajahi
+              </h4>
+
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li>
+                  <a
+                    href="#home"
+                    className="transition hover:text-blue-400"
+                  >
+                    Beranda
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="#detail-jurusan"
+                    className="transition hover:text-blue-400"
+                  >
+                    Detail Jurusan
+                  </a>
+                </li>
+
+                <li>
+                  <a
+                    href="#riwayat"
+                    className="transition hover:text-blue-400"
+                  >
+                    Riwayat Tes
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+
+            {/* ===== JURUSAN ===== */}
+            <div>
+              <h4 className="mb-4 text-sm font-bold text-white">
+                Jurusan
+              </h4>
+
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li className="transition hover:text-blue-400">IPA</li>
+                <li className="transition hover:text-blue-400">IPS</li>
+                <li className="transition hover:text-blue-400">Bahasa</li>
+                <li className="transition hover:text-blue-400">TKJ</li>
+                <li className="transition hover:text-blue-400">TKRO</li>
+                <li className="transition hover:text-blue-400">AKL</li>
+              </ul>
+            </div>
+
+
+            {/* ===== TENTANG ===== */}
+            <div>
+              <h4 className="mb-4 text-sm font-bold text-white">
+                Tes Jurusan
+              </h4>
+
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li className="transition hover:text-blue-400">
+                  Tes Akademik
+                </li>
+
+                <li className="transition hover:text-blue-400">
+                  Tes Minat RIASEC
+                </li>
+
+                <li className="transition hover:text-blue-400">
+                  Tes Bakat
+                </li>
+              </ul>
+            </div>
+          </div>
+
+
+          {/* ===== GARIS ===== */}
+          <div className="my-8 h-px w-full bg-white/10" />
+
+
+          {/* ===== BAGIAN BAWAH ===== */}
+          <div className="flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+
+            <p className="text-xs text-slate-500">
+              © 2026 MyJurusan. All rights reserved.
+            </p>
+
+            <p className="text-xs text-slate-500">
+              Sistem Rekomendasi Jurusan
+            </p>
+
+          </div>
+        </div>
+      </footer>
 
       {/* ===== MODAL PROFILE ===== */}
       {showProfile && (
