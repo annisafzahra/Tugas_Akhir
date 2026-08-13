@@ -1160,7 +1160,7 @@ const LandingPage = () => {
             {showDropdown && (
               <>
                 <div className="fixed inset-0 z-70" onClick={() => setShowDropdown(false)}></div>
-                <div className="absolute right-0 z-80 mt-2 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-100 bg-white py-2 shadow-xl">
+                <div className="absolute right-0 z-80 mt-2 w-[min(14rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-blue-500 bg-white py-2 shadow-xl">
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="text-sm font-semibold text-slate-800">{me.nama_lengkap}</p>
                     <p className="text-xs text-slate-500">Kelas {me.kelas}</p>
@@ -1193,17 +1193,18 @@ const LandingPage = () => {
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex-1 flex items-center justify-center p-4 relative z-30">
         <div className="w-full lg:w-[70%]">
-          <div className="relative h-[400px] z-30 bg-white rounded-3xl shadow-xl border-1 border-blue-300 flex flex-row justify-end">
-            <div className='absolute left-[300px] w-[250px] h-[150px] overflow-hidden'>
+          <div className="relative lg:h-[400px] h-[530px] z-30 bg-white rounded-3xl shadow-xl border-1 border-blue-300 flex flex-col lg:flex-row justify-end">
+            <div className='absolute left-[300px] w-[250px] h-[150px] overflow-hidden hidden lg:flex'>
                 <div className='w-[200px] h-[200px] rounded-full bg-blue-100 absolute -top-[100px]'></div>
             </div>
-            <div className='absolute -top-[78px] -left-[10px]'>
+            <div className='absolute -top-[78px] -left-[10px] hidden lg:flex'>
                 <Image src="/landing.png" alt="Admin" width={600} height={600} />
             </div>
-            <div className='w-[50%] flex flex-col gap-6 pt-[70px]'>
-                <p className='text-[40px] font-bold leading-[1.2]'>Bingung Memilih Jurusan? Kami Siap Membantu!</p>
-                <p className='w-[500px]'>Ikuti tes akademik, minat, dan bakat untuk menemukan jurusan yang paling sesuai dengan dirimu sehingga kamu dapat belajar dengan lebih percaya diri.</p>
-                <button onClick={()=>{router.push('/soal')}} className='w-[500px] flex flex-row gap-3 items-center justify-center font-bold text-[15px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 text-white py-4 transition-transform duration-300 hover:scale-105'>
+            
+            <div className='lg:w-[50%] w-full flex p-10 flex-col gap-3 lg:gap-6 lg:pt-[70px]'>
+                <p className='lg:text-[40px] text-center font-bold leading-[1.2] text-[26px]'>Bingung Memilih Jurusan? Kami Siap Membantu!</p>
+                <p className='lg:w-[500px] w-full text-center lg:text-justify text-[10px] lg:text-[15px]'>Ikuti tes akademik, minat, dan bakat untuk menemukan jurusan yang paling sesuai dengan dirimu sehingga kamu dapat belajar dengan lebih percaya diri.</p>
+                <button onClick={()=>{router.push('/soal')}} className='lg:w-[500px] w-full flex flex-row gap-3 items-center justify-center font-bold lg:text-[15px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 text-white py-4  transition-transform duration-300 hover:scale-105 mt-3'>
                     Mulai Tes
                     <svg
                     className="w-5 h-5 text-white"
@@ -1220,7 +1221,9 @@ const LandingPage = () => {
                     </svg>
                 </button>
             </div>
-
+            <div className='absolute -top-[30px] left-7 lg:hidden'>
+                <Image src="/landing.png" alt="Admin" width={300} height={300} />
+            </div>
 
           </div>
         </div>
@@ -1229,18 +1232,18 @@ const LandingPage = () => {
       
       {/* ===== DETAIL JURUSAN ===== */}
       <div className="relative z-10 flex bg-blue-500 -top-[50px] items-center justify-center px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="w-full px-[200px]">
-          <div className="grid grid-cols-1 py-[70px] items-start gap-8 lg:grid-cols-[0.78fr_1.7fr] lg:gap-10">
+        <div className="w-full lg:px-[200px]">
+          <div className=" py-[70px] items-start flex flex-col lg:flex-row lg:gap-10">
           {/* ===== BAGIAN KIRI ===== */}
-          <div className="flex flex-col items-center pt-0 text-center lg:items-start lg:pt-4 lg:text-left">
-              <p className="mb-3 w-fit rounded-full border border-white px-5 py-2 text-center text-sm font-semibold text-white sm:px-6">
+          <div className="flex flex-col pt-0 text-center items-center mb-8 lg:items-start lg:pt-4 lg:text-left px-[20px]">
+              <p className="mb-3 w-fit rounded-full border border-white px-5 py-2 text-center lg:text-[15px] text-[10px] font-semibold text-white sm:px-6">
               Detail Jurusan
               </p>
               <h2 className="mb-4 max-w-md text-[26px] font-bold leading-[1.15] text-white sm:text-[30px] lg:mb-5">
               Kenali Jurusan yang
               Sesuai dengan Dirimu
               </h2>
-              <p className="max-w-md text-sm leading-relaxed text-white sm:text-[15px] lg:max-w-[320px]">
+              <p className="max-w-md text-[10px] leading-relaxed text-white lg:text-[15px] lg:max-w-[320px]">
               Setiap jurusan memiliki bidang pembelajaran dan karakteristik yang
               berbeda. Kenali masing-masing jurusan agar kamu dapat memahami
               pilihan yang sesuai dengan minat, kemampuan, dan bakatmu.
@@ -1267,22 +1270,22 @@ const LandingPage = () => {
               "
           >
               {/* ================= IPA ================= */}
-              <div className="min-w-[280px] max-w-[280px] h-[530px] sm:min-w-[320px] sm:max-w-[320px] sm:min-h-[450px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
+              <div className="min-w-[280px] max-w-[280px] lg:h-[530px] sm:min-w-[320px] sm:max-w-[320px] sm:min-h-[450px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
               <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-[28px] mb-5">
                   🔬
               </div>
               <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                   IPA
               </h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+              <p className="text-[12px] lg:text-[14px] text-slate-500 leading-relaxed mt-3">
                   Jurusan IPA mempelajari berbagai ilmu tentang alam, seperti
                   Matematika, Fisika, Kimia, dan Biologi.
               </p>
               <div className="mt-5">
-                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  <p className="text-[12px] lg:text-[14px] font-semibold text-slate-700 mb-3">
                   Cocok untuk kamu yang:
                   </p>
-                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <ul className="space-y-2 text-[12px] lg:text-[14px] text-slate-500">
                   <li className="flex items-start gap-2">
                       <span className="text-blue-500 font-bold">✓</span>
                       Menyukai pelajaran sains.
@@ -1303,7 +1306,7 @@ const LandingPage = () => {
               </div>
               <button
                   onClick={() => setSelectedJurusan('IPA')}
-                  className="mt-auto w-full rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="mt-auto w-full rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-3 text-[12px] lg:text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
               >
                   Lihat Detail
               </button>
@@ -1317,15 +1320,15 @@ const LandingPage = () => {
               <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                   IPS
               </h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+              <p className="text-[12px] lg:text-[14px] text-slate-500 leading-relaxed mt-3">
                   Jurusan IPS mempelajari kehidupan masyarakat, ekonomi, sejarah,
                   geografi, dan berbagai peristiwa sosial.
               </p>
               <div className="mt-5">
-                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  <p className="text-[12px] lg:text-[14px] font-semibold text-slate-700 mb-3">
                   Cocok untuk kamu yang:
                   </p>
-                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <ul className="space-y-2 text-[12px] lg:text-[14px] text-slate-500">
                   <li className="flex items-start gap-2">
                       <span className="text-orange-500 font-bold">✓</span>
                       Senang berdiskusi.
@@ -1346,7 +1349,7 @@ const LandingPage = () => {
               </div>
               <button
                   onClick={() => setSelectedJurusan('IPS')}
-                  className="mt-auto w-full rounded-xl bg-orange-500 hover:bg-orange-600 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="mt-auto w-full rounded-xl bg-orange-500 hover:bg-orange-600 px-4 py-3 text-[12px] lg:text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
               >
                   Lihat Detail
               </button>
@@ -1359,15 +1362,15 @@ const LandingPage = () => {
               <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                   Bahasa
               </h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+              <p className="text-[12px] lg:text-[14px] text-slate-500 leading-relaxed mt-3">
                   Jurusan Bahasa berfokus pada kemampuan berbahasa, komunikasi,
                   sastra, serta pemahaman berbagai budaya.
               </p>
               <div className="mt-5">
-                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  <p className="text-[12px] lg:text-[14px] font-semibold text-slate-700 mb-3">
                   Cocok untuk kamu yang:
                   </p>
-                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <ul className="space-y-2 text-[12px] lg:text-[14px] text-slate-500">
                   <li className="flex items-start gap-2">
                       <span className="text-purple-500 font-bold">✓</span>
                       Gemar membaca.
@@ -1388,7 +1391,7 @@ const LandingPage = () => {
               </div>
               <button
                   onClick={() => setSelectedJurusan('Bahasa')}
-                  className="mt-auto w-full rounded-xl bg-purple-600 hover:bg-purple-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="mt-auto w-full rounded-xl bg-purple-600 hover:bg-purple-700 px-4 py-3 text-[12px] lg:text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
               >
                   Lihat Detail
               </button>
@@ -1401,15 +1404,15 @@ const LandingPage = () => {
               <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                   TKJ
               </h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+              <p className="text-[12px] lg:text-[14px] text-slate-500 leading-relaxed mt-3">
                   Jurusan TKJ mempelajari komputer, jaringan, perangkat keras,
                   serta dasar-dasar teknologi informasi.
               </p>
               <div className="mt-5">
-                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  <p className="text-[12px] lg:text-[14px] font-semibold text-slate-700 mb-3">
                   Cocok untuk kamu yang:
                   </p>
-                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <ul className="space-y-2 text-[12px] lg:text-[14px] text-slate-500">
                   <li className="flex items-start gap-2">
                       <span className="text-cyan-500 font-bold">✓</span>
                       Menyukai komputer.
@@ -1430,7 +1433,7 @@ const LandingPage = () => {
               </div>
               <button
                   onClick={() => setSelectedJurusan('TKJ')}
-                  className="mt-auto w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="mt-auto w-full rounded-xl bg-cyan-600 hover:bg-cyan-700 px-4 py-3 text-[12px] lg:text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
               >
                   Lihat Detail
               </button>
@@ -1443,15 +1446,15 @@ const LandingPage = () => {
               <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                   AKL
               </h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+              <p className="text-[12px] lg:text-[14px] text-slate-500 leading-relaxed mt-3">
                   Jurusan AKL mempelajari pengelolaan keuangan, pencatatan
                   transaksi, dan dasar-dasar akuntansi.
               </p>
               <div className="mt-5">
-                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  <p className="text-[12px] lg:text-[14px] font-semibold text-slate-700 mb-3">
                   Cocok untuk kamu yang:
                   </p>
-                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <ul className="space-y-2 text-[12px] lg:text-[14px] text-slate-500">
                   <li className="flex items-start gap-2">
                       <span className="text-emerald-500 font-bold">✓</span>
                       Teliti dalam bekerja.
@@ -1472,7 +1475,7 @@ const LandingPage = () => {
               </div>
               <button
                   onClick={() => setSelectedJurusan('AKL')}
-                  className="mt-auto w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="mt-auto w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-[12px] lg:text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
               >
                   Lihat Detail
               </button>
@@ -1485,15 +1488,15 @@ const LandingPage = () => {
               <h3 className="text-[22px] font-bold text-slate-700 sm:text-[24px]">
                   TKRO
               </h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed mt-3">
+              <p className="text-[12px] lg:text-[14px] text-slate-500 leading-relaxed mt-3">
                   Jurusan TKRO mempelajari cara kerja, perawatan, dan perbaikan
                   kendaraan bermotor.
               </p>
               <div className="mt-5">
-                  <p className="text-[14px] font-semibold text-slate-700 mb-3">
+                  <p className="text-[12px] lg:text-[14px] font-semibold text-slate-700 mb-3">
                   Cocok untuk kamu yang:
                   </p>
-                  <ul className="space-y-2 text-[14px] text-slate-500">
+                  <ul className="space-y-2 text-[12px] lg:text-[14px] text-slate-500">
                   <li className="flex items-start gap-2">
                       <span className="text-red-500 font-bold">✓</span>
                       Menyukai dunia otomotif.
@@ -1514,7 +1517,7 @@ const LandingPage = () => {
               </div>
               <button
                   onClick={() => setSelectedJurusan('TKRO')}
-                  className="mt-auto w-full rounded-xl bg-red-600 hover:bg-red-700 px-4 py-3 text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
+                  className="mt-auto w-full rounded-xl bg-red-600 hover:bg-red-700 px-4 py-3 text-[12px] lg:text-[14px] font-bold text-white shadow-sm transition-all duration-200 hover:scale-[1.02]"
               >
                   Lihat Detail
               </button>
@@ -1721,13 +1724,13 @@ const LandingPage = () => {
             <div className="flex w-full min-w-0 flex-col lg:w-[64%]">
 
               {/* header riwayat mobile / desktop */}
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between px-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-500">
                     Riwayat Rekomendasi
                   </p>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-[10px] lg:text-[15px] text-slate-500">
                     Hasil tes yang pernah kamu lakukan
                   </p>
                 </div>
@@ -2069,7 +2072,8 @@ const LandingPage = () => {
                 bg-blue-100
                 px-5
                 py-2
-                text-sm
+                text-[10px]
+                lg:text-[15px]
                 font-semibold
                 text-blue-600
               ">
@@ -2079,7 +2083,7 @@ const LandingPage = () => {
               <h2 className="
                 mb-4
                 max-w-md
-                text-[28px]
+                text-[26px]
                 font-extrabold
                 leading-[1.15]
                 text-slate-800
@@ -2092,10 +2096,9 @@ const LandingPage = () => {
 
               <p className="
                 max-w-md
-                text-sm
-                leading-7
+                text-[10px] px-[5]
                 text-slate-500
-                sm:text-[15px]
+                lg:text-[15px]
                 lg:max-w-[320px]
               ">
                 Lihat kembali hasil tes dan rekomendasi jurusan yang pernah
@@ -2112,12 +2115,12 @@ const LandingPage = () => {
                     ✓
                   </div>
 
-                  <div>
+                  <div className='flex flex-col items-start'>
                     <p className="text-xs font-bold text-slate-700">
                       Hasil Tersimpan
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+                    <p className="mt-1 text-[10px] text-left text-slate-500">
                       Semua hasil tesmu dapat dilihat kembali kapan saja.
                     </p>
                   </div>
@@ -2129,12 +2132,12 @@ const LandingPage = () => {
                     ↓
                   </div>
 
-                  <div>
+                  <div className='flex flex-col items-start'>
                     <p className="text-xs font-bold text-slate-700">
                       Unduh PDF
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+                    <p className="mt-1 text-[10px] text-left text-slate-500">
                       Simpan hasil rekomendasimu dalam bentuk dokumen PDF.
                     </p>
                   </div>
