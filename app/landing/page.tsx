@@ -1193,7 +1193,7 @@ const LandingPage = () => {
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex-1 flex items-center justify-center p-4 relative z-30">
         <div className="w-full lg:w-[70%]">
-          <div className="relative lg:h-[400px] h-[530px] z-30 bg-white rounded-3xl shadow-xl border-1 border-blue-300 flex flex-col lg:flex-row justify-end">
+          <div className="relative lg:min-h-[400px] min-h-[530px] z-30 bg-white rounded-3xl shadow-xl border-1 border-blue-300 flex flex-col lg:flex-row justify-end">
             <div className='absolute left-[300px] w-[250px] h-[150px] overflow-hidden hidden lg:flex'>
                 <div className='w-[200px] h-[200px] rounded-full bg-blue-100 absolute -top-[100px]'></div>
             </div>
@@ -1202,7 +1202,7 @@ const LandingPage = () => {
             </div>
             
             <div className='lg:w-[50%] w-full flex p-10 flex-col gap-3 lg:gap-6 lg:pt-[70px]'>
-                <p className='lg:text-[40px] text-center font-bold leading-[1.2] text-[26px]'>Bingung Memilih Jurusan? Kami Siap Membantu!</p>
+                <p className='lg:text-[40px] text-left font-bold leading-[1.2] text-[26px]'>Bingung Memilih Jurusan? Kami Siap Membantu!</p>
                 <p className='lg:w-[500px] w-full text-center lg:text-justify text-[10px] lg:text-[15px]'>Ikuti tes akademik, minat, dan bakat untuk menemukan jurusan yang paling sesuai dengan dirimu sehingga kamu dapat belajar dengan lebih percaya diri.</p>
                 <button onClick={()=>{router.push('/soal')}} className='lg:w-[500px] w-full flex flex-row gap-3 items-center justify-center font-bold lg:text-[15px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 text-white py-4  transition-transform duration-300 hover:scale-105 mt-3'>
                     Mulai Tes
