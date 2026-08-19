@@ -404,6 +404,54 @@ const LandingPage = () => {
 
   const allowLeaveRef = useRef(false);
 
+  const jurusanScrollRef = useRef<HTMLDivElement>(null);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkJurusanScroll = () => {
+    const element = jurusanScrollRef.current;
+
+    if (!element) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = element;
+
+    setCanScrollLeft(scrollLeft > 5);
+
+    setCanScrollRight(
+      scrollLeft + clientWidth < scrollWidth - 5
+    );
+  };
+
+  const scrollJurusan = (direction: "left" | "right") => {
+    const element = jurusanScrollRef.current;
+
+    if (!element) return;
+
+    const scrollAmount = 340;
+
+    element.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    const element = jurusanScrollRef.current;
+
+    if (!element) return;
+
+    checkJurusanScroll();
+
+    element.addEventListener("scroll", checkJurusanScroll);
+    window.addEventListener("resize", checkJurusanScroll);
+
+    return () => {
+      element.removeEventListener("scroll", checkJurusanScroll);
+      window.removeEventListener("resize", checkJurusanScroll);
+    };
+  }, []);
+
   useEffect(()=>{
     const fetch = async () => {
       const id = localStorage.getItem('user_id_jurusan');
@@ -1250,8 +1298,57 @@ const LandingPage = () => {
               </p>
           </div>
           {/* ===== BAGIAN KANAN ===== */}
-          <div
+          <div className="relative w-full min-w-0">
+
+          {/* ===== PANAH KIRI ===== */}
+          {canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => scrollJurusan("left")}
+              aria-label="Geser ke kiri"
               className="
+                absolute
+                left-3
+                top-1/2
+                z-20
+                -translate-y-1/2
+                flex
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-full
+                bg-white
+                text-blue-600
+                shadow-lg
+                transition-all
+                duration-200
+                hover:scale-110
+                hover:bg-blue-50
+                border-1 border-blue-500
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+          )}
+
+          {/* ===== CARD SCROLL ===== */}
+          <div
+            ref={jurusanScrollRef}
+            onScroll={checkJurusanScroll}
+            className="
               flex
               w-full
               gap-4
@@ -1267,7 +1364,7 @@ const LandingPage = () => {
               [&::-webkit-scrollbar-track]:rounded-full
               [&::-webkit-scrollbar-thumb]:bg-blue-300
               [&::-webkit-scrollbar-thumb]:rounded-full
-              "
+            "
           >
               {/* ================= IPA ================= */}
               <div className="min-w-[280px] max-w-[280px] lg:h-[530px] sm:min-w-[320px] sm:max-w-[320px] sm:min-h-[450px] bg-white border border-b-4 border-blue-800 rounded-[24px] p-5 shadow-sm snap-start flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:rounded-[28px] sm:p-6">
@@ -1522,10 +1619,60 @@ const LandingPage = () => {
                   Lihat Detail
               </button>
               </div>
-          </div>
-          </div>
-      </div>
-      </div>
+
+              </div>
+
+              {/* ===== PANAH KANAN ===== */}
+              {canScrollRight && (
+                <button
+                  type="button"
+                  onClick={() => scrollJurusan("right")}
+                  aria-label="Geser ke kanan"
+                  className="
+                    absolute
+                    right-3
+                    top-1/2
+                    z-20
+                    -translate-y-1/2
+                    flex
+                    h-11
+                    w-11
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-white
+                    text-blue-600
+                    shadow-lg
+                    transition-all
+                    duration-200
+                    hover:scale-110
+                    hover:bg-blue-50
+                    border-1 border-blue-500
+                  "
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+              )}
+
+            </div> {/* penutup relative slider */}
+
+          </div> {/* penutup flex bagian kiri + kanan */}
+
+        </div> {/* penutup w-full lg:px-[200px] */}
+
+      </div> {/* penutup DETAIL JURUSAN bg-blue-500 */}
   
       
 
